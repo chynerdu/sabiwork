@@ -8,18 +8,25 @@ class UserModel {
   String? createdAt;
   String? gender;
   String? role;
+  String? address;
+  String? state;
+  String? lga;
+  String? profileImage;
 
-  UserModel({
-    this.phone,
-    this.id,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.firstTimeLogin,
-    this.createdAt,
-    this.gender,
-    this.role,
-  });
+  UserModel(
+      {this.phone,
+      this.id,
+      this.firstName,
+      this.lastName,
+      this.email,
+      this.firstTimeLogin,
+      this.createdAt,
+      this.gender,
+      this.role,
+      this.address,
+      this.profileImage,
+      this.state,
+      this.lga});
 
   UserModel.fromJson(Map<String, dynamic> json) {
     phone = json['phone'];
@@ -31,6 +38,10 @@ class UserModel {
     createdAt = json['createdAt'];
     gender = json['gender'];
     role = json['role'];
+    address = json['address'];
+    state = json['state'];
+    profileImage = json['profileImage'];
+    lga = json['lga'];
   }
 
   Map<String, dynamic> toJson() {
@@ -44,6 +55,10 @@ class UserModel {
     data['createdAt'] = this.createdAt;
     data['gender'] = this.gender;
     data['role'] = this.role;
+    data['address'] = this.address;
+    data['state'] = this.state;
+    data['profileImage'] = this.profileImage;
+    data['lga'] = this.lga;
 
     return data;
   }

@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:sabiwork/models/changePasswordModel.dart';
 import 'package:sabiwork/models/editProfileModel.dart';
+import 'package:sabiwork/models/otherInfoModel.dart';
 import 'package:sabiwork/models/signinModel.dart';
 import 'package:sabiwork/models/signupModel.dart';
 import 'package:sabiwork/models/userModel.dart';
@@ -30,13 +31,15 @@ class AuthService {
 
   Future signUp(SignupModel payload) async {
     final authResult = await _service.postData(APIPath.userSignUp(), payload);
+    print('result : $authResult');
+    await localStorage.setData(name: 'token', data: authResult['token']);
+    await fetchProfile();
     // final decodedData = UserModel.fromJson(authResult);
     print('result : $authResult');
   }
 
-  Future upateAccount(EditProfileModel payload) async {
-    final authResult =
-        await _service.patchData(APIPath.updateAccount(), payload);
+  Future upateAccount(OtherInfoModel payload) async {
+    final authResult = await _service.putData(APIPath.updateAccount(), payload);
     await fetchProfile();
     // final decodedData = UserModel.fromJson(authResult);
     print('result : $authResult');
@@ -66,5 +69,25 @@ class AuthService {
     print('result : $result');
 
     return decodedData;
+  }
+
+  Future fetchStates() async {
+    Controller c = Get.put(Controller());
+    c.updateJobFetchStatus(true);
+    final result = await _service.getData(path: APIPath.states());
+
+    print('result : $result');
+
+    return result;
+  }
+
+  Future fetchLGA(id) async {
+    Controller c = Get.put(Controller());
+    c.updateJobFetchStatus(true);
+    final result = await _service.getData(path: APIPath.lga(id));
+
+    print('result : $result');
+
+    return result;
   }
 }

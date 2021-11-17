@@ -72,6 +72,7 @@ class Input extends StatelessWidget {
   final Color? styleColor;
   final Color? hintStyleColor;
   final bool? enabled;
+  final bool? readOnly;
   final String? labelText;
   final dynamic? maxLines;
   final Color? borderColor;
@@ -99,6 +100,7 @@ class Input extends StatelessWidget {
       this.styleColor,
       this.hintStyleColor,
       this.enabled = true,
+      this.readOnly = false,
       this.labelText,
       this.maxLines = 1,
       this.borderColor = CustomColors.Ivory,
@@ -123,7 +125,8 @@ class Input extends StatelessWidget {
           controller: controller,
           key: key,
           enabled: enabled,
-          style: TextStyle(fontSize: 14, color: Color(0xff8C8A8A)),
+          readOnly: readOnly as bool,
+          style: TextStyle(fontSize: 15, color: Color(0xff8C8A8A)),
           cursorColor: styleColor,
           obscureText: obscureText as bool,
           maxLines: maxLines,

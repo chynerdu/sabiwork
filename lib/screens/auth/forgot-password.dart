@@ -6,20 +6,21 @@ import 'package:sabiwork/components/inputText.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/helpers/flushBar.dart';
 import 'package:sabiwork/models/signinModel.dart';
-import 'package:sabiwork/screens/auth/forgot-password.dart';
+import 'package:sabiwork/screens/auth/complete-registration.dart';
 import 'package:sabiwork/screens/home/tabs.dart';
+import 'package:sabiwork/screens/serviceProvider/job-details.dart';
 import 'package:get/get.dart';
 import 'package:sabiwork/services/auth_service.dart';
 
-class Login extends StatefulWidget {
+class ForgotPassword extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return LoginState();
+    return ForgotPasswordState();
   }
 }
 
-class LoginState extends State<Login> {
+class ForgotPasswordState extends State<ForgotPassword> {
   final AuthService authService = AuthService();
   final SigninModel signinModel = SigninModel();
   final CustomFlushBar customFlushBar = CustomFlushBar();
@@ -71,9 +72,15 @@ class LoginState extends State<Login> {
                         SizedBox(height: 89),
                         SvgPicture.asset('assets/SabiWork.svg'),
                         SizedBox(height: 66),
-                        Text('Login To Your Account.',
+                        Text('Forgot Password',
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w500)),
+                        SizedBox(height: 5),
+                        Text(
+                            'A link will be sent to your email to reset your password',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w500)),
                         SizedBox(height: 66),
                         Input(
                           hintText: 'Email Address',
@@ -86,48 +93,9 @@ class LoginState extends State<Login> {
                             signinModel.email = value;
                           },
                         ),
-                        SizedBox(height: 39),
-                        Input(
-                          hintText: 'Password',
-                          obscureText: obscurePassword,
-                          suffixIcon: GestureDetector(
-                              onTap: () {
-                                toggleObscurePassword();
-                                rebuildAllChildren(context);
-                              },
-                              child: Icon(
-                                  obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: Colors.white)),
-                          validator: (String? value) {
-                            if (value == '')
-                              return 'Password cannot be empty';
-                            else if (value!.length < 5)
-                              return 'Password must 6 characters or more';
-                          },
-                          onSaved: (String? value) {
-                            signinModel.password = value;
-                          },
-                          prefix: Icon(
-                            Icons.lock,
-                            color: CustomColors.PrimaryColor,
-                          ),
-                          // suffixIcon: Icon(Icons.visibility_off)
-                        ),
-                        SizedBox(height: 10.5),
-                        GestureDetector(
-                            onTap: () => Get.to(ForgotPassword()),
-                            child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Text('Forgot password?',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: CustomColors.PrimaryColor,
-                                        fontWeight: FontWeight.w500)))),
                         SizedBox(height: 92.65),
                         SWbutton(
-                          title: 'Login',
+                          title: 'Continue',
                           onPressed: () {
                             submit(context);
                             // Get.to(Tabs());

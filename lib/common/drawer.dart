@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
+import 'package:sabiwork/common/profileImage.dart';
 import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/components/SWbutton.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/services/getStates.dart';
+import 'package:sabiwork/services/http_instance.dart';
 
 class SabiDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
@@ -40,7 +42,10 @@ class SabiDrawer extends StatelessWidget {
                       'Yes',
                       style: TextStyle(color: Colors.black),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      Get.put(Controller());
+                      await localStorage.clearAll();
+                      // Get.reset();
                       Navigator.pushNamedAndRemoveUntil(
                           context, LoginRoute, (route) => false);
                     },
@@ -70,9 +75,7 @@ class SabiDrawer extends StatelessWidget {
             children: [
               ListTile(
                 contentPadding: EdgeInsets.only(left: 0),
-                leading: CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/danKid.jpg'),
-                ),
+                leading: ProfileImageSAvatar(),
                 title: Text(
                     '${c.userData.value.firstName} ${c.userData.value.lastName}',
                     style: TextStyle(
@@ -104,11 +107,17 @@ class SabiDrawer extends StatelessWidget {
                               leading: Icon(Icons.person, color: Colors.white),
                               title: Text('Profile',
                                   style: TextStyle(color: Colors.white))),
-                          ListTile(
-                              leading: SvgPicture.asset('assets/icons/jobs.svg',
-                                  color: Colors.white),
-                              title: Text('My Jobs',
-                                  style: TextStyle(color: Colors.white))),
+                          GestureDetector(
+                              onTap: () {
+                                Controller c = Get.put(Controller());
+                                c.updateTab(1);
+                              },
+                              child: ListTile(
+                                  leading: SvgPicture.asset(
+                                      'assets/icons/jobs.svg',
+                                      color: Colors.white),
+                                  title: Text('My Jobs',
+                                      style: TextStyle(color: Colors.white)))),
                           Divider(color: Colors.white),
                           ListTile(
                               leading: SvgPicture.asset(

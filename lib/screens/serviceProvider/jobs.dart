@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:sabiwork/common/drawer.dart';
 import 'package:sabiwork/common/ratingBar.dart';
+import 'package:sabiwork/common/shimmerList.dart';
 import 'package:sabiwork/common/stacked_image.dart';
 import 'package:sabiwork/components/SWbutton.dart';
+import 'package:sabiwork/models/allJobsModel.dart';
 import 'package:sabiwork/screens/serviceProvider/job-details.dart';
+import 'package:sabiwork/services/getStates.dart';
 
 class JobMain extends StatelessWidget {
   Widget build(BuildContext context) {
@@ -36,7 +41,7 @@ class JobScreen extends StatefulWidget {
 class JobScreenState extends State<JobScreen> {
   int tabIndex = 0;
   final GlobalKey<ScaffoldState> _key = GlobalKey();
-
+  Controller c = Get.put(Controller());
   Widget build(BuildContext context) {
     return Scaffold(
         // appBar: AppBar(
@@ -151,7 +156,7 @@ class JobScreenState extends State<JobScreen> {
                         Expanded(
                           child: TabBarView(
                             physics: NeverScrollableScrollPhysics(),
-                            children: [AllJobs(), SavedJobs()],
+                            children: [AllJobs(c), SavedJobs(c)],
                           ),
                         ),
                       ],
@@ -164,6 +169,9 @@ class JobScreenState extends State<JobScreen> {
 }
 
 class AllJobs extends StatelessWidget {
+  final _scrollController = ScrollController();
+  final Controller c;
+  AllJobs(this.c);
   Widget build(BuildContext context) {
     return SingleChildScrollView(
         child: Column(
@@ -179,6 +187,11 @@ class AllJobs extends StatelessWidget {
                 decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide:
+                          BorderSide(width: 0.5, color: Color(0xffAEAEAE)),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
                       borderSide:
@@ -187,17 +200,21 @@ class AllJobs extends StatelessWidget {
                     prefixIcon: Icon(Icons.search),
                     label: Text('Search')))),
         SizedBox(height: 37),
-        JobCard(),
-        SizedBox(height: 20),
-        JobCard(),
-        SizedBox(height: 20),
-        JobCard()
+        c.isFetchingJobs.value
+            ? ShimmerList()
+            : Column(
+                children: c.allJobs.value.data!
+                    .map((Data e) => JobCard(job: e))
+                    .toList())
       ],
     ));
   }
 }
 
 class SavedJobs extends StatelessWidget {
+  final _scrollController = ScrollController();
+  final Controller c;
+  SavedJobs(this.c);
   Widget build(BuildContext context) {
     return SingleChildScrollView(
         child: Column(
@@ -213,6 +230,11 @@ class SavedJobs extends StatelessWidget {
                 decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide:
+                          BorderSide(width: 0.5, color: Color(0xffAEAEAE)),
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
                       borderSide:
@@ -221,36 +243,46 @@ class SavedJobs extends StatelessWidget {
                     prefixIcon: Icon(Icons.search),
                     label: Text('Search')))),
         SizedBox(height: 37),
-        JobCard(),
-        SizedBox(height: 20),
-        JobCard(),
-        SizedBox(height: 20),
-        JobCard()
+        c.isFetchingJobs.value
+            ? ShimmerList()
+            : Column(
+                children: c.allJobs.value.data!
+                    .map((Data e) => JobCard(job: e))
+                    .toList())
       ],
     ));
   }
 }
 
 class JobCard extends StatelessWidget {
+  NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
+  Data job;
+  JobCard({required this.job});
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
           // Navigator.push(
           //   context,
           //   MaterialPageRoute(builder: (_) => JobDetailsState)))
-          Get.to(JobDetails());
+          Get.to(JobDetails(job: job));
         },
         child: Container(
+            margin: EdgeInsets.only(bottom: 16),
             padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10), color: Colors.white),
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                  color: Color(0xffefefef), blurRadius: 10.0, spreadRadius: 3.0)
+            ], borderRadius: BorderRadius.circular(10), color: Colors.white),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    SabiBadges(title: '3 Persons', color: Color(0xffe6e6e6)),
                     SabiBadges(
-                        title: 'Male and Female', color: Color(0xfff8dfdb))
+                        title: '${job.numberOfWorkers} Persons',
+                        color: Color(0xffe6e6e6)),
+                    SabiBadges(
+                        title: '${job.jobType}', color: Color(0xfff8dfdb))
                   ],
                 ),
                 SizedBox(height: 9),
@@ -260,15 +292,16 @@ class JobCard extends StatelessWidget {
                   children: [
                     Container(
                         width: MediaQuery.of(context).size.width * 0.6,
-                        child: Text('I need someone to clean the house',
+                        child: Text('${job.description}',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                               color: Color(0xff983701),
                             ))),
-                    Text('N5,000',
+                    Text('₦${_format.format(job.pricePerWorker)}',
                         style: TextStyle(
                           fontSize: 14,
+                          fontFamily: "Roboto",
                           fontWeight: FontWeight.w800,
                         )),
                   ],
@@ -277,7 +310,8 @@ class JobCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Icon(Icons.location_pin, size: 10),
-                    Text('Mushin, Lagos',
+                    Text(
+                        '${job.user!.lga ?? 'Not specified'}, ${job.user!.state ?? ''}',
                         style: TextStyle(
                           fontSize: 8,
                           fontWeight: FontWeight.w500,
@@ -285,8 +319,7 @@ class JobCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 10),
-                Text(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Non varius.',
+                Text('${job.additionalDetails}',
                     style: TextStyle(
                       fontSize: 13,
                       color: Color(0xff888888),
@@ -299,9 +332,9 @@ class JobCard extends StatelessWidget {
                       //  left
                       Row(
                         children: [
-                          StackedImage(),
+                          StackedImage(count: job.applicantCount),
                           SizedBox(width: 10),
-                          Text(' 10 applicants',
+                          Text(' ${job.applicantCount} applicants',
                               style: TextStyle(
                                 fontSize: 8,
                                 fontWeight: FontWeight.w500,
@@ -311,8 +344,10 @@ class JobCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Icon(Icons.timer, size: 10),
-                          Text('30 mins ago',
+                          Icon(Icons.access_time, size: 8),
+                          SizedBox(width: 3),
+                          Text(
+                              '${Jiffy(job.createdAt).startOf(Units.DAY).fromNow()}',
                               style: TextStyle(
                                 fontSize: 8,
                                 fontWeight: FontWeight.w500,

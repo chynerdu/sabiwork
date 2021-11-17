@@ -153,4 +153,49 @@ class HttpInstance {
       throw error.error ?? 'error occured';
     }
   }
+
+  Future putData(String path, data) async {
+    var token = await localStorage.getData(name: 'token');
+    headers['Authorization'] = "Bearer $token";
+    print('token ${headers['Authorization']}');
+    Controller c = Get.put(Controller());
+    try {
+      c.change(true);
+      Future<http.Response> apiResponse = http.put(
+        Uri.parse(path),
+        body: jsonEncode(data),
+        headers: headers,
+      );
+      http.Response response = await apiResponse;
+      print('api $path');
+      print('api body ${jsonEncode(data)}');
+      print('response code ${response.statusCode}');
+      print('response ${response.body}');
+      c.change(false);
+      if (response.statusCode < 200 || response.statusCode > 299) {
+        throw ResponseModel.fromJson(jsonDecode(response.body));
+      }
+      ResponseModel decodedData =
+          ResponseModel.fromJson(jsonDecode(response.body));
+      if (response.statusCode < 200 || response.statusCode > 299) {
+        print('here');
+        throw decodedData;
+      }
+      return decodedData.result ?? decodedData.message;
+    } on SocketException catch (_) {
+      c.change(false);
+      throw 'Kindly, check your internet connection.';
+    } on TimeoutException catch (_) {
+      c.change(false);
+      throw 'Request Timeout.';
+    } on FormatException catch (_) {
+      c.change(false);
+      throw 'Error Occured.';
+    } catch (e) {
+      final ResponseModel error = e as ResponseModel;
+      c.change(false);
+      print('errr ${e.toString()} ');
+      throw error.error ?? 'error occured';
+    }
+  }
 }

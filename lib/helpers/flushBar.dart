@@ -23,7 +23,7 @@ class CustomFlushBar {
       backgroundGradient: LinearGradient(
           colors: [Colors.red[500] as Color, Colors.red[700] as Color]),
       isDismissible: true,
-      duration: Duration(seconds: 5),
+      duration: Duration(seconds: 8),
       icon: Icon(
         Icons.error,
         color: Colors.white,
@@ -63,7 +63,7 @@ class CustomFlushBar {
       backgroundGradient: LinearGradient(
           colors: [Colors.green[500] as Color, Colors.green[700] as Color]),
       isDismissible: true,
-      duration: Duration(seconds: 5),
+      duration: Duration(seconds: 10),
       icon: Icon(
         Icons.error,
         color: Colors.white,
@@ -77,8 +77,8 @@ class CustomFlushBar {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      showProgressIndicator: true,
-      progressIndicatorBackgroundColor: Colors.black,
+      showProgressIndicator: false,
+      // progressIndicatorBackgroundColor: Colors.black,
     )..show(context);
   }
 }

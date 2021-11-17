@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/screens/auth/complete-registration.dart';
+import 'package:sabiwork/screens/auth/forgot-password.dart';
 import 'package:sabiwork/screens/auth/login.dart';
 import 'package:sabiwork/screens/auth/register.dart';
 
@@ -13,6 +14,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case CompleteRegistrationRoute:
       return MaterialPageRoute(builder: (context) => CompleteRegistration());
+
+    case ForgotPasswordRoute:
+      return MaterialPageRoute(builder: (context) => ForgotPassword());
 
     default:
       return MaterialPageRoute(builder: (context) => Login());

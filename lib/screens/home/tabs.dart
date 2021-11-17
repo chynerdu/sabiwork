@@ -8,6 +8,7 @@ import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/screens/serviceProvider/dashboard_serviceprod.dart';
 import 'package:sabiwork/screens/serviceProvider/jobs.dart';
 import 'package:sabiwork/services/getStates.dart';
+import 'package:sabiwork/services/job_service.dart';
 
 class Tabs extends StatefulWidget {
   @override
@@ -18,6 +19,7 @@ class Tabs extends StatefulWidget {
 }
 
 class TabsState extends State<Tabs> {
+  JobService jobService = JobService();
   // int _selectedIndex = 0;
   // VisitService visitService = VisitService();
 
@@ -34,6 +36,7 @@ class TabsState extends State<Tabs> {
     // _selectedIndex = c.activeTab.value;
     // fetchVisitHistory();
     // fetchVisitRequests();
+    jobService.fetchAllJobs();
     super.initState();
   }
 
