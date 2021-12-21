@@ -158,7 +158,7 @@ class RegisterState extends State<Register> {
                             if (value == '')
                               return 'Password cannot be empty';
                             else if (value!.length < 5)
-                              return 'Password must 6 characters or more';
+                              return 'Password must be 6 characters or more';
                           },
                           onSaved: (String? value) {
                             signupModel.password = value;

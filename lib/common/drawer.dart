@@ -13,7 +13,7 @@ import 'package:sabiwork/services/http_instance.dart';
 
 class SabiDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
-    Future<bool> _onWillPop() async {
+    Future<bool> _onWillPop(c) async {
       // if (_selectedIndex != 0) {
       //   setState(() {
       //     _selectedIndex = 0;
@@ -46,6 +46,7 @@ class SabiDrawer extends StatelessWidget {
                       Get.put(Controller());
                       await localStorage.clearAll();
                       // Get.reset();
+                      c.resetUserData();
                       Navigator.pushNamedAndRemoveUntil(
                           context, LoginRoute, (route) => false);
                     },
@@ -150,7 +151,7 @@ class SabiDrawer extends StatelessWidget {
                                 color: Colors.white,
                                 title: 'Logout',
                                 onPressed: () {
-                                  _onWillPop();
+                                  _onWillPop(c);
                                 },
                               ),
                             )))

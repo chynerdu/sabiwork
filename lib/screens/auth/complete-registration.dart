@@ -101,6 +101,10 @@ class CompleteRegistrationState extends State<CompleteRegistration> {
   submit(context) async {
     Controller c = Get.put(Controller());
     try {
+      if (!_formKey.currentState!.validate()) {
+        return;
+      }
+      _formKey.currentState!.save();
       c.change(true);
       var token = await localStorage.getData(name: 'token');
 

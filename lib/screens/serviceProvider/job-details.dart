@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
@@ -280,14 +281,36 @@ class JobDetailsState extends State<JobDetails> {
                 SizedBox(height: 11),
                 Container(
                     height: 115,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        Image.asset('assets/images/img1.jpeg'),
-                        Image.asset('assets/images/img2.jpg'),
-                        Image.asset('assets/images/img3.jpeg')
-                      ],
-                    )),
+                    child: widget.job!.jobImages!.length > 0
+                        ? ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: widget.job!.jobImages!.length,
+                            itemBuilder: (BuildContext context, index) {
+                              return CachedNetworkImage(
+                                imageUrl: '${widget.job!.jobImages![index]}',
+                                progressIndicatorBuilder: (context, url,
+                                        downloadProgress) =>
+                                    Container(
+                                        margin: EdgeInsets.symmetric(
+                                            horizontal: 10),
+                                        height: 115,
+                                        child: Center(
+                                            child: SizedBox(
+                                                width: 10,
+                                                height: 10,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        value: downloadProgress
+                                                            .progress)))),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
+                              );
+                              // Image.network(
+                              //     '${widget.job!.jobImages![index]}');
+                            })
+                        : Image.network(
+                            'https://via.placeholder.com/150.png?text=No+image+available')),
                 SizedBox(height: 17),
                 // Description
                 Divider(),

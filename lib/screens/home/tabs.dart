@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:sabiwork/helpers/customColors.dart';
+import 'package:sabiwork/screens/client/client-jobs.dart';
+
 import 'package:sabiwork/screens/serviceProvider/dashboard_serviceprod.dart';
 import 'package:sabiwork/screens/serviceProvider/jobs.dart';
 import 'package:sabiwork/services/getStates.dart';
@@ -37,6 +39,8 @@ class TabsState extends State<Tabs> {
     // fetchVisitHistory();
     // fetchVisitRequests();
     jobService.fetchAllJobs();
+    jobService.fetchMyJobs();
+    jobService.fetchApprovedJobs();
     super.initState();
   }
 
@@ -105,6 +109,16 @@ class TabsState extends State<Tabs> {
     // ResidentServiceScreen()
   ];
 
+  List<Widget> _clientWidgetOptions = <Widget>[
+    ServiceProviderMain(),
+    ClientJobMain(),
+    Container(child: Center(child: Text('Chat Coming soon'))),
+    Container(child: Center(child: Text('Notification Coming soon'))),
+    Container(child: Center(child: Text('Money Coming soon'))),
+    // Container(child: Center(child: Text('Community Coming soon'))),
+    // ResidentServiceScreen()
+  ];
+
   Widget build(BuildContext context) {
     Controller c = Get.put(Controller());
     return Obx(() => WillPopScope(
@@ -112,8 +126,10 @@ class TabsState extends State<Tabs> {
         child: Scaffold(
           body: AnnotatedRegion<SystemUiOverlayStyle>(
               value: SystemUiOverlayStyle.dark,
-              child:
-                  SafeArea(child: _widgetOptions.elementAt(c.activeTab.value))),
+              child: SafeArea(
+                  child: c.userData.value.role == "service-provider"
+                      ? _widgetOptions.elementAt(c.activeTab.value)
+                      : _clientWidgetOptions.elementAt(c.activeTab.value))),
           bottomNavigationBar: BottomNavigationBar(
             items: [
               BottomNavigationBarItem(

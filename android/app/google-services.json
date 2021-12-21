@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "111437301916",
+    "project_id": "sabiwork-244ab",
+    "storage_bucket": "sabiwork-244ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111437301916:android:e4e896bcdbe5aa79f2c559",
+        "android_client_info": {
+          "package_name": "com.example.sabiwork"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111437301916-2afqcuqe9ho6inn72prfaha1vp3us0ng.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAv6Id1AOFeXtjzoAnx_ReEkUD9ykCstGI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111437301916-2afqcuqe9ho6inn72prfaha1vp3us0ng.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

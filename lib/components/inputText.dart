@@ -139,7 +139,7 @@ class Input extends StatelessWidget {
             labelText: labelText,
             labelStyle: TextStyle(color: Colors.black),
             hintText: hintText ?? labelText,
-            hintStyle: TextStyle(color: Colors.black),
+            hintStyle: TextStyle(color: Color(0xff9E9E9E)),
             isDense: true,
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(6),

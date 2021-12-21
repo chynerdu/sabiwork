@@ -216,6 +216,23 @@ class ShimmerList extends StatelessWidget {
   }
 }
 
+class ShimmerRow extends StatelessWidget {
+  Widget build(BuildContext context) {
+    return Container(
+        height: 152,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            ShimmerListCustom(),
+            SizedBox(height: 20),
+            ShimmerListCustom(),
+            SizedBox(height: 20),
+            ShimmerListCustom()
+          ],
+        ));
+  }
+}
+
 class ShimmerList2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(

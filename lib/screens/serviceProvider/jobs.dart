@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:sabiwork/common/drawer.dart';
+import 'package:sabiwork/common/profileImage.dart';
 import 'package:sabiwork/common/ratingBar.dart';
 import 'package:sabiwork/common/shimmerList.dart';
 import 'package:sabiwork/common/stacked_image.dart';
@@ -73,19 +74,21 @@ class JobScreenState extends State<JobScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     InkWell(
-                        // onTap: () => ZoomDrawer.of(context)!.open(),
-                        child: Container(
-                      // radius: 50,
+                      // onTap: () => ZoomDrawer.of(context)!.open(),
+                      child: ProfileImage(),
+                      //      Container(
+                      //   // radius: 50,
 
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: AssetImage('assets/images/danKid.jpg'),
-                          )),
-                    )),
+                      //   width: 30,
+                      //   height: 30,
+                      //   decoration: BoxDecoration(
+                      //       borderRadius: BorderRadius.circular(30),
+                      //       image: DecorationImage(
+                      //         fit: BoxFit.cover,
+                      //         image: AssetImage('assets/images/danKid.jpg'),
+                      //       )),
+                      // )
+                    ),
                     Text('Jobs',
                         style: TextStyle(
                             fontWeight: FontWeight.w500,

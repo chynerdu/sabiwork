@@ -9,7 +9,8 @@ class AllJobsModel {
     if (json['data'] != null) {
       data = [];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        // check for null description
+        if (v['description'] != 'null') data!.add(new Data.fromJson(v));
       });
     }
   }
@@ -28,11 +29,17 @@ class Data {
   int? applicantCount;
   List<String>? shortlistedApplicants;
   String? sId;
+  List<String>? jobImages;
+
   String? description;
   String? additionalDetails;
-  int? numberOfWorkers;
-  int? pricePerWorker;
+  dynamic numberOfWorkers;
+  dynamic pricePerWorker;
   UserModel? user;
+  String? state;
+  String? lga;
+  String? address;
+
   String? createdAt;
   int? iV;
 
@@ -41,23 +48,32 @@ class Data {
       this.applicantCount,
       this.shortlistedApplicants,
       this.sId,
+      this.jobImages,
       this.description,
       this.additionalDetails,
       this.numberOfWorkers,
       this.pricePerWorker,
+      this.state,
+      this.lga,
+      this.address,
       this.user,
       this.createdAt,
       this.iV});
 
   Data.fromJson(Map<String, dynamic> json) {
-    jobType = json['job_type'];
+    jobType = json['job_type'] ?? '-';
+    jobImages = json['job_images'].cast<String>();
+
     applicantCount = json['applicant_count'];
     shortlistedApplicants = json['shortlistedApplicants'].cast<String>();
     sId = json['_id'];
-    description = json['description'];
+    lga = json['lga'] == 'null' ? 'Not specified' : json['lga'];
+    state = json['state'] ?? '';
+    address = json['address'];
+    description = json['description'] ?? '-';
     additionalDetails = json['additionalDetails'] ?? 'No additional details';
-    numberOfWorkers = json['number_of_workers'];
-    pricePerWorker = json['price_per_worker'];
+    numberOfWorkers = int.tryParse(json['number_of_workers']) ?? 0;
+    pricePerWorker = int.tryParse(json['price_per_worker']) ?? 0;
     user = json['user'] != null ? new UserModel.fromJson(json['user']) : null;
     createdAt = json['createdAt'];
     iV = json['__v'];
@@ -66,9 +82,14 @@ class Data {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['job_type'] = this.jobType;
+    data['job_images'] = this.jobImages;
+
     data['applicant_count'] = this.applicantCount;
     data['shortlistedApplicants'] = this.shortlistedApplicants;
     data['_id'] = this.sId;
+    data['lga'] = this.lga;
+    data['state'] = this.state;
+    data['address'] = this.address;
     data['description'] = this.description;
     data['additionalDetails'] = this.additionalDetails;
 

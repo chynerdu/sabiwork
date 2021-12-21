@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sabiwork/common/route_constants.dart';
@@ -33,9 +35,9 @@ class ForgotPasswordState extends State<ForgotPassword> {
         return;
       }
       _formKey.currentState!.save();
-      final result = await authService.signIn(signinModel);
+      final result = await authService.requestPasswordReset(signinModel);
       print('result $result');
-      Get.to(Tabs());
+      _success(context);
     } catch (e) {
       // show flushbar
       customFlushBar.showErrorFlushBar(
@@ -43,9 +45,61 @@ class ForgotPasswordState extends State<ForgotPassword> {
     }
   }
 
-  toggleObscurePassword() {
-    obscurePassword = !obscurePassword;
-    setState(() {});
+  Future<bool> _success(context) async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: new AlertDialog(
+              // title: new Text(
+              //   'Add a Message to your application (Optional)',
+              //   style: TextStyle(color: CustomColors.PrimaryColor),
+              // ),
+              content: Container(
+                height: 200,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      new Text(
+                        'Request sent',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        'A link has been sent to your email. Follow the instructions in the email inorder to complete the process.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 48,
+                      ),
+                      SizedBox(
+                          height: 33,
+                          child: SWSuttonSmall(
+                              title: 'Close',
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.pushReplacementNamed(
+                                    context, LoginRoute);
+                              }))
+                    ]),
+              ),
+
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(15)),
+            ),
+          ),
+        )) ??
+        false;
   }
 
   void rebuildAllChildren(BuildContext context) {

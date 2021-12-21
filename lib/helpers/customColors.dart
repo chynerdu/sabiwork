@@ -13,6 +13,8 @@ class CustomColors {
   //     colors: [Color(0xff4d545a), Color(0xff4d545a)]);
 
   static const Color PrimaryColor = Color(0xFF983701);
+  static const Color ButtonColor = Color(0xFFBD4300);
+
   static const Color SecondaryColor1 = Color(0xFFE9D6FF);
   static const Color SecondaryColor2 = Color(0xFFAC8BD3);
   static const Color SecondaryColor3 = Color(0xFFFAF6FF);

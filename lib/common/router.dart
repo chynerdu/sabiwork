@@ -4,6 +4,8 @@ import 'package:sabiwork/screens/auth/complete-registration.dart';
 import 'package:sabiwork/screens/auth/forgot-password.dart';
 import 'package:sabiwork/screens/auth/login.dart';
 import 'package:sabiwork/screens/auth/register.dart';
+import 'package:sabiwork/screens/auth/splash.dart';
+import 'package:sabiwork/screens/home/tabs.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
@@ -17,6 +19,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case ForgotPasswordRoute:
       return MaterialPageRoute(builder: (context) => ForgotPassword());
+
+    case TabsRoute:
+      return MaterialPageRoute(builder: (context) => Tabs());
+
+    case SplashRoute:
+      return MaterialPageRoute(builder: (context) => Splash());
 
     default:
       return MaterialPageRoute(builder: (context) => Login());
