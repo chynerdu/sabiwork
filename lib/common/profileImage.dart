@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/models/userModel.dart';
 import 'package:sabiwork/services/getStates.dart';
@@ -11,23 +12,24 @@ class ProfileImage extends StatelessWidget {
     return Obx(() {
       if (c.userData.value.profileImage != null) {
         return Container(
-            width: 32,
-            height: 32,
+            width: 45,
+            height: 45,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(30),
               color: CustomColors.PrimaryColor,
             ),
-            child: Container(
+            child: Center(
+                child: Container(
               // radius: 50,
 
-              width: 30,
-              height: 30,
+              width: 43,
+              height: 43,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   image: DecorationImage(
                       fit: BoxFit.cover,
                       image: NetworkImage('${c.userData.value.profileImage}'))),
-            ));
+            )));
       } else {
         return Container(
             width: 32,
@@ -54,11 +56,64 @@ class ProfileImage extends StatelessWidget {
   }
 }
 
-class ProfileImageSAvatar extends StatelessWidget {
+class ProfileImageBig extends StatelessWidget {
   Widget build(BuildContext context) {
     Controller c = Get.put(Controller());
 
     return Obx(() {
+      if (c.userData.value.profileImage != null) {
+        return Container(
+            width: 105,
+            height: 105,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(80),
+              color: CustomColors.PrimaryColor,
+            ),
+            child: Center(
+                child: Container(
+              // radius: 50,
+
+              width: 103,
+              height: 103,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(80),
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage('${c.userData.value.profileImage}'))),
+            )));
+      } else {
+        return Container(
+            width: 105,
+            height: 105,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(80),
+              color: CustomColors.PrimaryColor,
+            ),
+            child: Container(
+              // radius: 50,
+
+              width: 103,
+              height: 103,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: c.userData.value.gender == 'male'
+                          ? AssetImage('assets/images/male.jpg')
+                          : AssetImage('assets/images/female.jpg'))),
+            ));
+      }
+    });
+  }
+}
+
+class ProfileImageSAvatar extends StatelessWidget {
+  Widget build(BuildContext context) {
+    Controller c = Get.put(Controller());
+
+    return GestureDetector(onTap: () {
+      Navigator.pushNamed(context, MyProfileRoute);
+    }, child: Obx(() {
       if (c.userData.value.profileImage != null) {
         return MainAvatar2(
             child: CircleAvatar(
@@ -72,7 +127,7 @@ class ProfileImageSAvatar extends StatelessWidget {
               : AssetImage('assets/images/female.jpg'),
         ));
       }
-    });
+    }));
   }
 }
 

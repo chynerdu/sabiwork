@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sabiwork/helpers/customColors.dart';
 
 class CBlueButtonWithIcon extends StatelessWidget {
   final Widget icon;
@@ -51,5 +52,64 @@ class CWhiteButtonWithIcon extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [icon, SizedBox(width: 10), title],
             )));
+  }
+}
+
+class CButtonOneIcon extends StatelessWidget {
+  const CButtonOneIcon(
+      {this.key,
+      this.color = CustomColors.ButtonColor,
+      this.borderColor = CustomColors.ButtonColor,
+      this.icon,
+      required this.text,
+      this.textColor = Colors.white,
+      @required this.onPressed,
+      this.disabled = false})
+      : super(key: key);
+  final Color color;
+  final Widget? icon;
+  final Color borderColor;
+  final String text;
+  final Color textColor;
+  final Key? key;
+
+  final Function()? onPressed;
+  final bool disabled;
+
+  @override
+  Widget build(BuildContext context) {
+    // ignore: deprecated_member_use
+    return FlatButton(
+      height: 40,
+      onPressed: disabled == true ? null : onPressed,
+      color: color,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+            color: disabled == true ? Colors.transparent : borderColor,
+            width: 1,
+            style: BorderStyle.solid),
+      ),
+      disabledColor: disabled == true ? CustomColors.DisabledColor : color,
+      child: Container(
+        child: Container(
+            // padding: EdgeInsets.symmetric(vertical: 10.0),
+            child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              text,
+              style: TextStyle(
+                  color: textColor, fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            icon != null
+                ? Container(
+                    padding: EdgeInsets.only(left: 12, top: 2), child: icon)
+                : Container()
+          ],
+        )),
+      ),
+    );
   }
 }

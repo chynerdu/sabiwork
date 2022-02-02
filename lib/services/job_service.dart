@@ -130,7 +130,7 @@ class JobService {
 
     // final decodedData = UserModel.fromJson(jobResult);
     print('result : $jobResult');
-    fetchApprovedJobs();
+    fetchApprovedApplicants(approvedJobId);
 
     return jobResult;
   }
@@ -151,7 +151,7 @@ class JobService {
 
     // final decodedData = UserModel.fromJson(jobResult);
     print('result : $jobResult');
-    fetchApprovedJobs();
+    fetchApprovedApplicants(approvedJobId);
     return jobResult;
   }
 }

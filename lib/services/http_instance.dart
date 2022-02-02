@@ -43,6 +43,10 @@ class HttpInstance {
       print('response code ${response.statusCode}');
       print('response ${response.body}');
       c.change(false);
+      if (response.statusCode == 404) {
+        c.change(false);
+        throw ResponseModel.fromJson({"error": 'Route not found'});
+      }
       if (response.statusCode < 200 || response.statusCode > 299) {
         throw ResponseModel.fromJson(jsonDecode(response.body));
       }
@@ -82,6 +86,10 @@ class HttpInstance {
       print('response code ${response.statusCode}');
       print('response ${response.body}');
       c.change(false);
+      if (response.statusCode == 404) {
+        c.change(false);
+        throw ResponseModel.fromJson({"error": 'Route not found'});
+      }
       if (response.statusCode < 200 || response.statusCode > 299) {
         throw ResponseModel.fromJson(jsonDecode(response.body));
       }
@@ -127,6 +135,10 @@ class HttpInstance {
       print('response code ${response.statusCode}');
       print('response ${response.body}');
       c.change(false);
+      if (response.statusCode == 404) {
+        c.change(false);
+        throw ResponseModel.fromJson({"error": 'Route not found'});
+      }
       if (response.statusCode < 200 || response.statusCode > 299) {
         throw ResponseModel.fromJson(jsonDecode(response.body));
       }
@@ -172,6 +184,10 @@ class HttpInstance {
       print('response code ${response.statusCode}');
       print('response ${response.body}');
       c.change(false);
+      if (response.statusCode == 404) {
+        c.change(false);
+        throw ResponseModel.fromJson({"error": 'Route not found'});
+      }
       if (response.statusCode < 200 || response.statusCode > 299) {
         throw ResponseModel.fromJson(jsonDecode(response.body));
       }

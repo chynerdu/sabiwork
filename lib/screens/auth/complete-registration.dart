@@ -164,6 +164,7 @@ class CompleteRegistrationState extends State<CompleteRegistration> {
       c.change(false);
 
       if (response.statusCode == 201 || response.statusCode == 200) {
+        await authService.fetchProfile();
         Get.to(Tabs());
       } else {
         customFlushBar.showErrorFlushBar(

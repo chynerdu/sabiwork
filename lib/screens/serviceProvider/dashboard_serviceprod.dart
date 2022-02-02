@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
@@ -7,9 +8,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:lottie/lottie.dart';
-import 'package:sabiwork/common/drawer.dart';
 import 'package:sabiwork/common/profileImage.dart';
-import 'package:sabiwork/common/ratingBar.dart';
+import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/common/shimmerList.dart';
 import 'package:sabiwork/common/stacked_image.dart';
 import 'package:sabiwork/components/SWbutton.dart';
@@ -20,24 +20,6 @@ import 'package:sabiwork/models/approvedJobModel.dart';
 import 'package:sabiwork/screens/serviceProvider/job-details.dart';
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/job_service.dart';
-
-class ServiceProviderMain extends StatelessWidget {
-  Widget build(BuildContext context) {
-    return ZoomDrawer(
-      // controller: ZoomDrawerController,
-      style: DrawerStyle.DefaultStyle,
-      menuScreen: SabiDrawer(),
-      mainScreen: ServiceProviderDashboard(),
-      borderRadius: 24.0,
-      showShadow: true,
-      angle: -12.0,
-      backgroundColor: Colors.blue,
-      slideWidth: MediaQuery.of(context).size.width * .45,
-      openCurve: Curves.fastOutSlowIn,
-      closeCurve: Curves.bounceIn,
-    );
-  }
-}
 
 class ServiceProviderDashboard extends StatefulWidget {
   @override
@@ -94,7 +76,8 @@ class ServiceProviderDashboardState extends State<ServiceProviderDashboard> {
                         onTap: () => ZoomDrawer.of(context)!.open(),
                         child: SvgPicture.asset('assets/icons/menu.svg')),
                     InkWell(
-                        // onTap: () => ZoomDrawer.of(context)!.open(),
+                        onTap: () =>
+                            Navigator.pushNamed(context, MyProfileRoute),
                         child: ProfileImage()),
                   ],
                 ),
@@ -112,6 +95,38 @@ class RecommendedJobs extends StatelessWidget {
 
   RecommendedJobs(this.c);
   JobService jobService = JobService();
+  completedJobCount(jobs) {
+    var count = jobs != null
+        ? jobs
+            .where((JobData job) => job.jobApplicantStatus == "job completed")
+            .toList()
+            .length
+        : 0;
+    return count.toString();
+  }
+
+  pendingJobCount(jobs) {
+    var count = jobs != null
+        ? jobs!
+            .where((JobData job) => job.jobApplicantStatus == "not started")
+            .toList()
+            .length
+        : 0;
+    return count.toString();
+  }
+
+  activeJobCount(jobs) {
+    var count = jobs != null
+        ? jobs!
+            .where((JobData job) =>
+                job.jobApplicantStatus == "awaiting confirmation" ||
+                job.jobApplicantStatus == "job started" ||
+                job.jobApplicantStatus == "job ended")
+            .toList()
+            .length
+        : 0;
+    return count.toString();
+  }
 
   Widget build(BuildContext context) {
     // _scrollController.addListener(toggleShowHeader());
@@ -152,7 +167,8 @@ class RecommendedJobs extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                   color: Color(0xff000000),
                                   fontSize: 20)),
-                          Text('You have no active job',
+                          Text(
+                              'You have ${c.allApprovedJobs.value.data?.length} active job',
                               style: TextStyle(
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xff8D8D8D),
@@ -179,7 +195,7 @@ class RecommendedJobs extends StatelessWidget {
                                     width: 0.5, color: Color(0xffAEAEAE)),
                               ),
                               prefixIcon: Icon(Icons.search),
-                              label: Text('Search')))),
+                              labelText: 'Search'))),
                   SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -225,19 +241,22 @@ class RecommendedJobs extends StatelessWidget {
                                 color1: Color(0xffB1EEFF),
                                 color2: Color(0xff29BAE2),
                                 title: 'Completed Jobs',
-                                count: '40'),
+                                count: completedJobCount(
+                                    c.allApprovedJobs.value.data)),
                             SizedBox(width: 11),
                             WidgetCards(
-                                color1: Color(0xffa1ffe7),
-                                color2: Color(0xff21cca1),
+                                color1: Color(0xffA9FFEA),
+                                color2: Color(0xff00B288),
                                 title: 'Active Jobs',
-                                count: '1'),
+                                count: activeJobCount(
+                                    c.allApprovedJobs.value.data)),
                             SizedBox(width: 11),
                             WidgetCards(
-                                color1: Color(0xffebb78d),
-                                color2: Color(0xfff08024),
+                                color1: Color(0xffFFB992),
+                                color2: Color(0xffD75F1C),
                                 title: 'Pending Jobs',
-                                count: '3'),
+                                count: pendingJobCount(
+                                    c.allApprovedJobs.value.data)),
                           ],
                         ),
                   SizedBox(height: 37),
@@ -340,7 +359,7 @@ class JobCard extends StatelessWidget {
         },
         child: Container(
             margin: EdgeInsets.only(bottom: 16),
-            padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
+            padding: EdgeInsets.fromLTRB(0, 0, 14, 14),
             decoration: BoxDecoration(boxShadow: [
               BoxShadow(
                   color: Color(0xffefefef), blurRadius: 10.0, spreadRadius: 3.0)
@@ -360,72 +379,117 @@ class JobCard extends StatelessWidget {
                 SizedBox(height: 9),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                        width: MediaQuery.of(context).size.width * 0.6,
-                        child: Text('${job.description}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xff983701),
-                            ))),
-                    Text('₦${_format.format(job.pricePerWorker)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: "Roboto",
-                          fontWeight: FontWeight.w800,
-                        )),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Icon(Icons.location_pin, size: 10),
-                    Text('${job.lga ?? 'Not specified'}, ${job.state ?? ''}',
-                        style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.w500,
-                        ))
-                  ],
-                ),
-                SizedBox(height: 10),
-                Text('${job.additionalDetails}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Color(0xff888888),
-                      fontWeight: FontWeight.w500,
-                    )),
-                SizedBox(height: 20),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      //  left
-                      Row(
+                    // image
+                    if (job.jobImages!.length > 0)
+                      Container(
+                          margin: EdgeInsets.only(top: 7),
+                          width: 40,
+                          height: 40,
+                          child: CachedNetworkImage(
+                            imageUrl: job.jobImages!.length > 0
+                                ? '${job.jobImages![0]}'
+                                : 'https://via.placeholder.com/150.png?text=No+image+available',
+                            progressIndicatorBuilder:
+                                (context, url, downloadProgress) => Container(
+                                    margin:
+                                        EdgeInsets.symmetric(horizontal: 10),
+                                    height: 115,
+                                    child: Center(
+                                        child: SizedBox(
+                                            width: 10,
+                                            height: 10,
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                value: downloadProgress
+                                                    .progress)))),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          )),
+                    SizedBox(width: 14),
+                    Expanded(
+                        child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          StackedImage(count: job.applicantCount),
-                          SizedBox(width: 10),
-                          Text('${job.applicantCount} applicant(s)',
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.w500,
-                              )),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.6 -
+                                          40,
+                                  child: Text('${job.description}',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xff983701),
+                                      ))),
+                              Text('₦${_format.format(job.pricePerWorker)}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: "Roboto",
+                                    fontWeight: FontWeight.w800,
+                                  )),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(Icons.location_pin, size: 10),
+                              Text(
+                                  '${job.lga ?? 'Not specified'}, ${job.state ?? ''}',
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w500,
+                                  ))
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Container(
+                              width: MediaQuery.of(context).size.width * 0.6,
+                              child: Text('${job.additionalDetails}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xff888888),
+                                    fontWeight: FontWeight.w500,
+                                  ))),
+                          SizedBox(height: 20),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                //  left
+                                Row(
+                                  children: [
+                                    StackedImage(count: job.applicantCount),
+                                    SizedBox(width: 10),
+                                    Text('${job.applicantCount} applicant(s)',
+                                        style: TextStyle(
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w500,
+                                        )),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Icon(Icons.access_time, size: 8),
+                                    SizedBox(width: 3),
+                                    Text(
+                                        '${Jiffy(job.createdAt).startOf(Units.DAY).fromNow()}',
+                                        style: TextStyle(
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w500,
+                                        ))
+                                  ],
+                                ),
+                              ])
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Icon(Icons.access_time, size: 8),
-                          SizedBox(width: 3),
-                          Text(
-                              '${Jiffy(job.createdAt).startOf(Units.DAY).fromNow()}',
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.w500,
-                              ))
-                        ],
-                      ),
-                    ])
+                    ))
+                  ],
+                ),
               ],
             )));
   }
@@ -451,6 +515,28 @@ class ApprovedJobCard extends StatelessWidget {
           animation: 'assets/images/wait.json',
           content:
               'Not so fast yet! We advice you ensure the job owner confirms this job has started before getting to work to avoid stories that touches the heart.🙃',
+          actionText: 'Okay! Noted',
+          action: () {
+            Navigator.pop(context);
+          });
+    } catch (e) {
+      customFlushBar.showErrorFlushBar(
+          title: 'Error occured', body: '$e', context: context);
+    }
+  }
+
+  endJob(context) async {
+    try {
+      await jobService.endJob(
+        approvedJobId: approvedJob.sId,
+      );
+
+      customDialogs.successDialog(
+          context: context,
+          title: 'You have ended this job,',
+          animation: 'assets/images/wait.json',
+          content:
+              'Not so fast yet! We advice you ensure the job owner confirms this job has ended. Funds will be transferred to your wallet when the owner confirms this job has ended',
           actionText: 'Okay! Noted',
           action: () {
             Navigator.pop(context);
@@ -512,21 +598,22 @@ class ApprovedJobCard extends StatelessWidget {
                                       color: Color(0xff983701),
                                     ))),
                             Container(
-                                width: MediaQuery.of(context).size.width * 0.17,
+                                // width: MediaQuery.of(context).size.width * 0.18,
                                 child: FittedBox(
-                                  fit: BoxFit.cover,
-                                  child: Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.2,
-                                      child: Text(
-                                          '${approvedJob.jobApplicantStatus!.toUpperCase()}',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.green,
-                                            fontFamily: "Roboto",
-                                            fontWeight: FontWeight.w800,
-                                          ))),
-                                ))
+                              fit: BoxFit.cover,
+                              child: Container(
+                                  // width: MediaQuery.of(context).size.width *
+                                  //     0.2,
+                                  child: Text(
+                                      '₦${_format.format(job.pricePerWorker)}',
+                                      // '${approvedJob.jobApplicantStatus!.toUpperCase()}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        // color: Colors.green,
+                                        fontFamily: "Roboto",
+                                        fontWeight: FontWeight.w800,
+                                      ))),
+                            ))
                           ],
                         )),
                     Row(
@@ -541,16 +628,16 @@ class ApprovedJobCard extends StatelessWidget {
                             ))
                       ],
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
                             height: 25,
-                            width: MediaQuery.of(context).size.width * 0.4,
+                            width: MediaQuery.of(context).size.width * 0.45,
                             child: handleButton(
                                 approvedJob.jobApplicantStatus, context)),
-                        SizedBox(width: 17),
+
                         // SizedBox(
                         //   height: 25,
                         //   width: MediaQuery.of(context).size.width * 0.3 - 22,
@@ -594,6 +681,7 @@ class ApprovedJobCard extends StatelessWidget {
       return SWSuttonSmall(
         title: 'End Job',
         onPressed: () {
+          endJob(context);
           // approve(context);
         },
       );
@@ -604,13 +692,15 @@ class ApprovedJobCard extends StatelessWidget {
           // approve(context);
         },
       );
-    else
-      return SWSuttonSmall(
-        title: '',
+    else if (jobStatus == 'job completed')
+      return SWSuttonGreenSmallDisbaled(
+        title: 'Job Completed',
         onPressed: () {
           // approve(context);
         },
       );
+    else
+      return Container();
   }
 }
 
@@ -621,46 +711,58 @@ class WidgetCards extends StatelessWidget {
   final String? title;
   WidgetCards({this.count, this.color1, this.color2, this.title});
   Widget build(BuildContext context) {
-    return Container(
-        width: MediaQuery.of(context).size.width / 3 - 25,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-            gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [color1 as Color, color2 as Color])),
-        padding: EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-        child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FittedBox(
-                fit: BoxFit.cover,
-                child: Text('$count',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xffffffff),
-                        fontSize: 24))),
-            // Align(
-            //     alignment: Alignment.centerRight,
-            //     child: SvgPicture.asset('$icon', width: 30, height: 30)),
-            // Align(
-            //     alignment: Alignment.centerLeft,
-            //     child: FittedBox(
-            //         fit: BoxFit.cover,
-            //         child: Text('$count',
-            //             style: TextStyle(
-            //                 fontWeight: FontWeight.w500,
-            //                 color: Color(0xff000000),
-            //                 fontSize: 24)))),
+    return Stack(
+      children: [
+        Container(
+            height: MediaQuery.of(context).size.width / 4 - 20,
+            width: MediaQuery.of(context).size.width / 3 - 25,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [color1 as Color, color2 as Color])),
+            padding: EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+            child: Column(
+              // crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FittedBox(
+                    fit: BoxFit.cover,
+                    child: Text('$count',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xffffffff),
+                            fontSize: 24))),
+                // Align(
+                //     alignment: Alignment.centerRight,
+                //     child: SvgPicture.asset('$icon', width: 30, height: 30)),
+                // Align(
+                //     alignment: Alignment.centerLeft,
+                //     child: FittedBox(
+                //         fit: BoxFit.cover,
+                //         child: Text('$count',
+                //             style: TextStyle(
+                //                 fontWeight: FontWeight.w500,
+                //                 color: Color(0xff000000),
+                //                 fontSize: 24)))),
 
-            FittedBox(
-                fit: BoxFit.cover,
-                child: Text('$title',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xffffffff),
-                        fontSize: 14))),
-          ],
-        ));
+                FittedBox(
+                    fit: BoxFit.cover,
+                    child: Text('$title',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xffffffff),
+                            fontSize: 14))),
+              ],
+            )),
+        Container(
+          height: MediaQuery.of(context).size.width / 4 - 20,
+          width: MediaQuery.of(context).size.width / 3 - 25,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              color: Colors.black.withOpacity(0.2)),
+        )
+      ],
+    );
   }
 }

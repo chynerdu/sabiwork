@@ -105,6 +105,10 @@ class SabiDrawer extends StatelessWidget {
                             Column(mainAxisSize: MainAxisSize.max, children: [
                           SizedBox(height: 20),
                           ListTile(
+                              onTap: () {
+                                Navigator.pushNamed(context, MyProfileRoute);
+                                ZoomDrawer.of(context)!.close();
+                              },
                               leading: Icon(Icons.person, color: Colors.white),
                               title: Text('Profile',
                                   style: TextStyle(color: Colors.white))),
@@ -112,6 +116,7 @@ class SabiDrawer extends StatelessWidget {
                               onTap: () {
                                 Controller c = Get.put(Controller());
                                 c.updateTab(1);
+                                ZoomDrawer.of(context)!.close();
                               },
                               child: ListTile(
                                   leading: SvgPicture.asset(

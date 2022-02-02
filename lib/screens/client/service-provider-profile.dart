@@ -343,6 +343,6 @@ class ReviewCard extends StatelessWidget {
 }
 
 class ServiceproviderProfileController extends GetxController {
-  Rx<bool> showReview = true.obs;
+  RxBool showReview = true.obs;
   void updateState() => showReview.value = !showReview.value;
 }

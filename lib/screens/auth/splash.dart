@@ -33,7 +33,7 @@ class _SplashState extends State<Splash> {
         const Duration(seconds: 3),
         () => token != ''
             ? fetchAccount()
-            : Navigator.pushNamed(context, LoginRoute));
+            : Navigator.pushNamed(context, IntroRoute));
   }
 
   getSavedData() async {
@@ -66,7 +66,7 @@ class _SplashState extends State<Splash> {
 
       await localStorage.removeData(name: 'cookie');
 
-      Navigator.pushNamed(context, LoginRoute);
+      Navigator.pushNamed(context, IntroRoute);
     }
   }
 

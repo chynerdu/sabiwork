@@ -228,13 +228,13 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
                                     '${widget.job!.numberOfWorkers} Person(s)',
                                 color: Color(0xffe6e6e6)),
                             SabiBadges(
-                                title: 'Females only', color: Color(0xfff8dfdb))
+                                title: 'Job open', color: Color(0xFF7AD67D))
                           ],
                         ),
                         SizedBox(height: 20),
                         Row(
                           children: [
-                            StackedImage(count: 2),
+                            StackedImage(count: widget.job!.applicantCount),
                             SizedBox(width: 10),
                             Text('${widget.job!.applicantCount} applicant(s)',
                                 style: TextStyle(
@@ -332,7 +332,7 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
                                         child: Align(
                                           alignment: Alignment.center,
                                           child: Text(
-                                            "Shortlisted (${c.allApplicants.value.data != null ? c.allApplicants.value.data!.length : 0})",
+                                            "Saved (${c.allApplicants.value.data != null ? c.allApplicants.value.data!.length : 0})",
                                             style: TextStyle(
                                                 fontSize: 14,
                                                 color: tabIndex == 1
@@ -451,7 +451,7 @@ class Shortlisted extends StatelessWidget {
                 children: c.allApplicants.value.data != null
                     ? c.allApplicants.value.data!
                         .map((ApplicantData e) =>
-                            ShortlistedUserCard(applicant: e))
+                            SaveApplicantUserCard(applicant: e))
                         .toList()
                     : [Container()])
       ],
@@ -474,10 +474,10 @@ class ApprovedApplicants extends StatelessWidget {
         c.isFetchingApplicants.value
             ? ShimmerList()
             : Column(
-                children: c.allApplicants.value.data != null
+                children: c.allApprovedApplicants.value.data != null
                     ? c.allApprovedApplicants.value.data!
                         .map((ApplicantData e) =>
-                            ShortlistedUserCard(applicant: e))
+                            ApprovedApplicantUserCard(applicant: e))
                         .toList()
                     : [Container()])
       ],
@@ -503,6 +503,22 @@ class UserCard extends StatelessWidget {
           body: 'You have successfully shortlisted this applicant',
           context: context);
       await jobService.fetchApplicants(applicant.job);
+    } catch (e) {
+      customFlushBar.showErrorFlushBar(
+          title: 'Error occured', body: '$e', context: context);
+    }
+  }
+
+  approve(context) async {
+    try {
+      await jobService.approveShortlistApplicant(
+          id: applicant.job, applicantId: applicant.user!.id);
+      Navigator.pop(context);
+      customFlushBar.showSuccessFlushBar(
+          title: 'Approved',
+          body: 'You have successfully approved this applicant',
+          context: context);
+      await jobService.fetchApprovedApplicants(applicant.job);
     } catch (e) {
       customFlushBar.showErrorFlushBar(
           title: 'Error occured', body: '$e', context: context);
@@ -547,6 +563,9 @@ class UserCard extends StatelessWidget {
                           ])
                         ],
                       ),
+                      trailing: IconButton(
+                          onPressed: () => shortList(context),
+                          icon: Icon(Icons.favorite_border_outlined, size: 15)),
                     )),
                 SizedBox(height: 14),
                 Container(
@@ -568,9 +587,9 @@ class UserCard extends StatelessWidget {
                       height: 34,
                       width: MediaQuery.of(context).size.width * 0.3 - 22,
                       child: SWSuttonSmall(
-                        title: 'Shortlist',
+                        title: 'Approve',
                         onPressed: () {
-                          shortList(context);
+                          approve(context);
                         },
                       ),
                     ),
@@ -601,10 +620,10 @@ class UserCard extends StatelessWidget {
   }
 }
 
-class ShortlistedUserCard extends StatelessWidget {
+class SaveApplicantUserCard extends StatelessWidget {
   NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
   ApplicantData applicant;
-  ShortlistedUserCard({required this.applicant});
+  SaveApplicantUserCard({required this.applicant});
   JobService jobService = JobService();
   final CustomFlushBar customFlushBar = CustomFlushBar();
 
@@ -666,8 +685,7 @@ class ShortlistedUserCard extends StatelessWidget {
                 Container(
                     color: Color(0xffFF8E08).withOpacity(0.05),
                     padding: EdgeInsets.symmetric(horizontal: 17, vertical: 6),
-                    child: Text(
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisi lectus diam, amet, ullamcorper egestas iaculis. Id neque, morbi sit ultrices imperdiet diam malesuada nulla. Pellentesque facilisis congue ac ligula faucibus amet viverra.',
+                    child: Text('${applicant.message}',
                         maxLines: 4,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -707,6 +725,164 @@ class ShortlistedUserCard extends StatelessWidget {
   }
 }
 
+class ApprovedApplicantUserCard extends StatelessWidget {
+  NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
+  ApplicantData applicant;
+  ApprovedApplicantUserCard({required this.applicant});
+  JobService jobService = JobService();
+  final CustomFlushBar customFlushBar = CustomFlushBar();
+
+  confirmStartJob(context) async {
+    try {
+      await jobService.confirmStartJob(approvedJobId: applicant.sId);
+      Navigator.pop(context);
+      customFlushBar.showSuccessFlushBar(
+          title: 'Confirmed',
+          body: 'You have successfully confirmed this job has started',
+          context: context);
+      await jobService.fetchApprovedApplicants(applicant.job);
+    } catch (e) {
+      customFlushBar.showErrorFlushBar(
+          title: 'Error occured', body: '$e', context: context);
+    }
+  }
+
+  confirmEndJob(context) async {
+    try {
+      await jobService.confirmEndJob(approvedJobId: applicant.sId);
+      Navigator.pop(context);
+      customFlushBar.showSuccessFlushBar(
+          title: 'Confirmed',
+          body: 'You have successfully confirmed this job has ended',
+          context: context);
+      await jobService.fetchApprovedApplicants(applicant.job);
+    } catch (e) {
+      customFlushBar.showErrorFlushBar(
+          title: 'Error occured', body: '$e', context: context);
+    }
+  }
+
+  handleButton(jobStatus, context) {
+    if (jobStatus == 'not started') {
+      return SWSuttonSmallDisbaled(
+        title: 'Waiting to Start',
+        onPressed: () {
+          null;
+          // approve(context);
+        },
+      );
+    } else if (jobStatus == 'awaiting confirmation')
+      return SWSuttonSmall(
+        title: 'Confirm Job Has Started',
+        onPressed: () {
+          confirmStartJob(context);
+          // approve(context);
+        },
+      );
+    else if (jobStatus == 'job started')
+      return SWSuttonSmallDisbaled(
+        title: 'Job Started',
+        onPressed: () {
+          // approve(context);
+        },
+      );
+    else if (jobStatus == 'job ended')
+      return SWSuttonSmall(
+        title: 'Confirm Job Has Ended',
+        onPressed: () {
+          confirmEndJob(context);
+          // approve(context);
+        },
+      );
+    else
+      return Container();
+  }
+
+  Widget build(BuildContext context) {
+    return InkWell(
+        onTap: () {
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(builder: (_) => JobDetailsState)))
+        },
+        child: Container(
+            margin: EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                    onTap: () =>
+                        Get.to(ServiceproviderProfile(applicants: applicant)),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.only(left: 0),
+                      leading: UsersProfileImageSAvatar(user: applicant.user),
+                      title: Text(
+                          '${applicant.user!.firstName} ${applicant.user!.lastName}',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('has completed 10 jobs',
+                              style: TextStyle(fontSize: 10)),
+                          Row(children: [
+                            RatingBarComponent(initialRating: 3.5),
+                            Text('(136 reviews)',
+                                style: TextStyle(fontSize: 7)),
+                          ])
+                        ],
+                      ),
+                      trailing:
+                          Text('${applicant.jobApplicantStatus!.toUpperCase()}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.green,
+                                fontFamily: "Roboto",
+                                fontWeight: FontWeight.w800,
+                              )),
+                    )),
+                SizedBox(height: 14),
+                Container(
+                    color: Color(0xffFF8E08).withOpacity(0.05),
+                    padding: EdgeInsets.symmetric(horizontal: 17, vertical: 6),
+                    child: Text('${applicant.message}',
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Color(0xff272727),
+                          fontWeight: FontWeight.w400,
+                        ))),
+                SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                        height: 34,
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: handleButton(
+                            applicant.jobApplicantStatus, context)),
+                    SizedBox(width: 17),
+                    // SizedBox(
+                    //   height: 34,
+                    //   width: MediaQuery.of(context).size.width * 0.3 - 22,
+                    //   child: SWBorderedButtonWithIcon(
+                    //     icon: Icon(Icons.close,
+                    //         color: Color(0xffBD4300), size: 13),
+                    //     title: 'Decline',
+                    //     onPressed: () {},
+                    //   ),
+                    // ),
+                  ],
+                ),
+              ],
+            )));
+  }
+}
+
 class SabiBadges extends StatelessWidget {
   final Color color;
   final String title;
@@ -727,6 +903,6 @@ class SabiBadges extends StatelessWidget {
 }
 
 class ClientJobDetailsController extends GetxController {
-  Rx<bool> showDescription = true.obs;
+  RxBool showDescription = true.obs;
   void updateState() => showDescription.value = !showDescription.value;
 }

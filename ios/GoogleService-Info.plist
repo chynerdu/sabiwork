@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>111437301916-ogrrcelt66v5uohh68ouahi0j717d6qt.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.111437301916-ogrrcelt66v5uohh68ouahi0j717d6qt</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD8zDaxYRsGZMntmLML4T-yYouE4uZmAi4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>111437301916</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.sabiwork</string>
+	<key>PROJECT_ID</key>
+	<string>sabiwork-244ab</string>
+	<key>STORAGE_BUCKET</key>
+	<string>sabiwork-244ab.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:111437301916:ios:c6753697d1bb0680f2c559</string>
+</dict>
+</plist>

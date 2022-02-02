@@ -9,6 +9,7 @@ import 'package:sabiwork/models/userModel.dart';
 
 class Controller extends GetxController {
   final activeTab = 0.obs;
+  final activeGender = 0.obs;
   // define loading state.
   final isLoading = false.obs;
 
@@ -74,4 +75,6 @@ class Controller extends GetxController {
   }
 
   void updateTab(state) => activeTab.value = state;
+
+  void updateGender(state) => activeGender.value = state;
 }

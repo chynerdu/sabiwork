@@ -202,49 +202,50 @@ class AllJobs extends StatelessWidget {
   JobService jobService = JobService();
   AllJobs(this.c);
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-        onRefresh: () => jobService.fetchAllJobs(),
-        child: Obx(() {
-          // print('my jobs ${c.myJobs.value.data!.length}');
-          return SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 34,
-                  ),
-                  SizedBox(
-                      height: 40,
-                      width: MediaQuery.of(context).size.width * 0.75,
-                      child: TextFormField(
-                          decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(6),
-                                borderSide: BorderSide(
-                                    width: 0.5, color: Color(0xffAEAEAE)),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(6),
-                                borderSide: BorderSide(
-                                    width: 0.5, color: Color(0xffAEAEAE)),
-                              ),
-                              prefixIcon: Icon(Icons.search),
-                              label: Text('Search')))),
-                  SizedBox(height: 37),
-                  c.isFetchingJobs.value
-                      ? ShimmerList()
-                      : Column(
-                          children: c.myJobs.value.data != null
-                              ? c.myJobs.value.data!
-                                  .map((MyJobData e) => JobCard(job: e))
-                                  .toList()
-                              : [Container()])
-                ],
-              ));
-        }));
+    return RefreshIndicator(onRefresh: () async {
+      print('refreshing');
+      await jobService.fetchMyJobs();
+    }, child: Obx(() {
+      // print('my jobs ${c.myJobs.value.data!.length}');
+      return SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 34,
+              ),
+              SizedBox(
+                  height: 40,
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  child: TextFormField(
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: BorderSide(
+                                width: 0.5, color: Color(0xffAEAEAE)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: BorderSide(
+                                width: 0.5, color: Color(0xffAEAEAE)),
+                          ),
+                          prefixIcon: Icon(Icons.search),
+                          labelText: 'Search'))),
+              SizedBox(height: 37),
+              c.isFetchingJobs.value
+                  ? ShimmerList()
+                  : Column(
+                      children: c.myJobs.value.data != null
+                          ? c.myJobs.value.data!
+                              .map((MyJobData e) => JobCard(job: e))
+                              .toList()
+                          : [Container()])
+            ],
+          ));
+    }));
   }
 }
 
@@ -278,7 +279,7 @@ class SavedJobs extends StatelessWidget {
                           BorderSide(width: 0.5, color: Color(0xffAEAEAE)),
                     ),
                     prefixIcon: Icon(Icons.search),
-                    label: Text('Search')))),
+                    labelText: 'Search'))),
         SizedBox(height: 37),
         c.isFetchingJobs.value
             ? ShimmerList()

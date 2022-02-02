@@ -26,19 +26,31 @@ class ApplicantsModel {
 class ApplicantData {
   String? sId;
   String? job;
+  String? jobApplicantStatus;
+  bool? iActive;
   UserModel? user;
   String? message;
   String? createdAt;
   int? iV;
 
   ApplicantData(
-      {this.sId, this.job, this.user, this.message, this.createdAt, this.iV});
+      {this.sId,
+      this.job,
+      this.jobApplicantStatus,
+      this.iActive,
+      this.user,
+      this.message,
+      this.createdAt,
+      this.iV});
 
   ApplicantData.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     job = json['job'];
+    jobApplicantStatus = json['jobApplicantStatus'];
+    iActive = json['iActive'];
     user = json['user'] != null ? new UserModel.fromJson(json['user']) : null;
-    message = json['message'];
+    message =
+        json['message'] != null ? json['message'] : 'No additional information';
     createdAt = json['createdAt'];
     iV = json['__v'];
   }
@@ -47,6 +59,8 @@ class ApplicantData {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.sId;
     data['job'] = this.job;
+    data['jobApplicantStatus'] = this.jobApplicantStatus;
+    data['iActive'] = this.iActive;
     if (this.user != null) {
       data['user'] = this.user!.toJson();
     }

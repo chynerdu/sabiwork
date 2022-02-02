@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:sabiwork/common/loader.dart';
@@ -9,6 +10,20 @@ import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/services/getStates.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: CustomColors.PrimaryColor, // navigation bar color
+    statusBarColor: CustomColors.PrimaryColor, // status bar color
+    statusBarBrightness: Brightness.light,
+
+    // systemStatusBarContrastEnforced: true, //status bar brigtness
+    statusBarIconBrightness: Brightness.light, //status barIcon Brightness
+    // systemNavigationBarDividerColor:
+    //     Colors.greenAccent, //Navigation bar divider color
+    systemNavigationBarIconBrightness: Brightness.light, //navigation bar icon
+  ));
+
   runApp(MyApp());
 }
 

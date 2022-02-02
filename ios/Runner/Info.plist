@@ -22,6 +22,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Use your camera to take images and job images</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We use your microphone to let take you upload your voice recordings</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select profile images and job images from photo library </string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

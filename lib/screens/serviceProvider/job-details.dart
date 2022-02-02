@@ -208,13 +208,13 @@ class JobDetailsState extends State<JobDetails> {
                                     '${widget.job!.numberOfWorkers} Person(s)',
                                 color: Color(0xffe6e6e6)),
                             SabiBadges(
-                                title: 'Females only', color: Color(0xfff8dfdb))
+                                title: 'Job open', color: Color(0xFF7AD67D))
                           ],
                         ),
                         SizedBox(height: 20),
                         Row(
                           children: [
-                            StackedImage(count: 2),
+                            StackedImage(count: widget.job!.applicantCount),
                             SizedBox(width: 10),
                             Text('${widget.job!.applicantCount} applicant(s)',
                                 style: TextStyle(

@@ -11,6 +11,17 @@ class LocalStorage {
     String? data = prefs.getString(name);
     return data;
   }
+  
+   setBoolData({required String name, required bool data}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(name, data);
+  }
+
+  getBoolData({required String name}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? data = prefs.getBool(name);
+    return data;
+  }
 
   removeData({required String name}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

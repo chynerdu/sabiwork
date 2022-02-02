@@ -29,7 +29,7 @@ class APIPath {
   static String shortlisthApplicants(id) =>
       '${Config.baseUrl}/applicants/shortlist/$id';
   static String approveShortlisthApplicants(id) =>
-      '${Config.baseUrl}/applicants/approved/$id';
+      '${Config.baseUrl}/applicants/approve/$id';
   static String addJob() => '${Config.baseUrl}/job';
   static String applyForJob(id) => '${Config.baseUrl}/job/$id';
   static String startJob(id) =>

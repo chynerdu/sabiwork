@@ -14,6 +14,9 @@ class CustomColors {
 
   static const Color PrimaryColor = Color(0xFF983701);
   static const Color ButtonColor = Color(0xFFBD4300);
+  static const Color DisabledColor = Color(0xFF925E42);
+  static const Color light = Color(0xff8595AD);
+  static const Color axterikBlackMain2 = Color(0xFF290E00);
 
   static const Color SecondaryColor1 = Color(0xFFE9D6FF);
   static const Color SecondaryColor2 = Color(0xFFAC8BD3);

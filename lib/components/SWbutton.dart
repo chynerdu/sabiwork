@@ -69,6 +69,28 @@ class SWSuttonSmallDisbaled extends StatelessWidget {
   }
 }
 
+class SWSuttonGreenSmallDisbaled extends StatelessWidget {
+  final Function onPressed;
+  final String title;
+  SWSuttonGreenSmallDisbaled({required this.onPressed, required this.title});
+
+  Widget build(BuildContext context) {
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: MaterialButton(
+            disabledColor: Colors.green.withOpacity(0.6),
+            onPressed: null,
+            child: Text('$title',
+                style: TextStyle(
+                    color: Color(0xffffffff),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500))));
+  }
+}
+
 class SWBorderedButton extends StatelessWidget {
   final Color? color;
   final Function onPressed;
@@ -93,6 +115,35 @@ class SWBorderedButton extends StatelessWidget {
                     color: color ?? Color(0xffBD4300),
                     fontSize: 12,
                     fontWeight: FontWeight.w500))));
+  }
+}
+
+class SWBorderedButtonBig extends StatelessWidget {
+  final Color? color;
+  final Function onPressed;
+  final String title;
+  SWBorderedButtonBig(
+      {this.color, required this.onPressed, required this.title});
+
+  Widget build(BuildContext context) {
+    return Container(
+        height: 55,
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: OutlinedButton(
+            style: ButtonStyle(
+                side: MaterialStateProperty.all<BorderSide>(
+                    BorderSide(color: color ?? Color(0xff983701)))),
+            onPressed: () {
+              onPressed();
+            },
+            child: Text('$title',
+                style: TextStyle(
+                    color: color ?? Color(0xff983701),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700))));
   }
 }
 

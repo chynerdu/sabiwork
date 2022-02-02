@@ -3,7 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get/get.dart';
+import 'package:sabiwork/common/drawer.dart';
+import 'package:sabiwork/helpers/appTourTargets.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/screens/client/client-jobs.dart';
 
@@ -11,8 +14,28 @@ import 'package:sabiwork/screens/serviceProvider/dashboard_serviceprod.dart';
 import 'package:sabiwork/screens/serviceProvider/jobs.dart';
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/job_service.dart';
+import 'package:sabiwork/services/localStorage.dart';
 
-class Tabs extends StatefulWidget {
+class Tabs extends StatelessWidget {
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: ZoomDrawer(
+      // controller: ZoomDrawerController,
+      style: DrawerStyle.DefaultStyle,
+      menuScreen: SabiDrawer(),
+      mainScreen: TabsMain(),
+      borderRadius: 24.0,
+      showShadow: true,
+      angle: -12.0,
+      backgroundColor: Colors.blue,
+      slideWidth: MediaQuery.of(context).size.width * .45,
+      openCurve: Curves.fastOutSlowIn,
+      closeCurve: Curves.bounceIn,
+    ));
+  }
+}
+
+class TabsMain extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -20,10 +43,14 @@ class Tabs extends StatefulWidget {
   }
 }
 
-class TabsState extends State<Tabs> {
+class TabsState extends State<TabsMain> {
   JobService jobService = JobService();
   // int _selectedIndex = 0;
   // VisitService visitService = VisitService();
+ AppTourTargets appTourTargets = AppTourTargets();
+  LocalStorage localStorage = LocalStorage();
+   GlobalKey myJobsKey = GlobalKey();
+  GlobalKey walletKey = GlobalKey();
 
   void onItemTap(int index) {
     Controller c = Get.put(Controller());
@@ -41,6 +68,15 @@ class TabsState extends State<Tabs> {
     jobService.fetchAllJobs();
     jobService.fetchMyJobs();
     jobService.fetchApprovedJobs();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      appTourTargets.addTargets(
+        context: context,
+        myJobsKey: myJobsKey,
+        // copyKeyTourKey: copyKeyTourKey,
+        walletKey: walletKey,
+        // shareKeyTourKey: shareKeyTourKey
+      );
+    });
     super.initState();
   }
 
@@ -100,7 +136,7 @@ class TabsState extends State<Tabs> {
   }
 
   List<Widget> _widgetOptions = <Widget>[
-    ServiceProviderMain(),
+    ServiceProviderDashboard(),
     JobMain(),
     Container(child: Center(child: Text('Chat Coming soon'))),
     Container(child: Center(child: Text('Notification Coming soon'))),
@@ -110,7 +146,7 @@ class TabsState extends State<Tabs> {
   ];
 
   List<Widget> _clientWidgetOptions = <Widget>[
-    ServiceProviderMain(),
+    ServiceProviderDashboard(),
     ClientJobMain(),
     Container(child: Center(child: Text('Chat Coming soon'))),
     Container(child: Center(child: Text('Notification Coming soon'))),
@@ -139,7 +175,8 @@ class TabsState extends State<Tabs> {
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: SvgPicture.asset('assets/icons/jobs.svg'),
+               
+                icon: SvgPicture.asset('assets/icons/jobs.svg', key: myJobsKey,),
                 activeIcon: SvgPicture.asset('assets/icons/jobs.svg',
                     color: Color(0xff983701)),
                 label: 'Jobs',
@@ -151,13 +188,15 @@ class TabsState extends State<Tabs> {
                 label: 'Chat',
               ),
               BottomNavigationBarItem(
+
                 icon: SvgPicture.asset('assets/icons/notifications.svg'),
                 activeIcon: SvgPicture.asset('assets/icons/notifications.svg',
                     color: Color(0xff983701)),
                 label: 'Notifications',
               ),
               BottomNavigationBarItem(
-                icon: SvgPicture.asset('assets/icons/money.svg'),
+               
+                icon: SvgPicture.asset('assets/icons/money.svg',  key: walletKey,),
                 activeIcon: SvgPicture.asset('assets/icons/money.svg',
                     color: Color(0xff983701)),
                 label: 'Money',

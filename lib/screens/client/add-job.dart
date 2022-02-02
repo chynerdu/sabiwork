@@ -186,8 +186,9 @@ class AddJobState extends State<AddJob> {
             title: 'Job Posted',
             body: 'Your job has been posted',
             context: context);
-
-        Navigator.pop(context);
+        await jobService.fetchMyJobs();
+        Get.back();
+        // Navigator.pop(context);
       } else {
         customFlushBar.showErrorFlushBar(
             title: 'Error occured', body: '$responseString', context: context);
@@ -463,7 +464,7 @@ class AddJobState extends State<AddJob> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle.dark,
+            value: SystemUiOverlayStyle.light,
             child: SafeArea(
                 child: Container(
                     padding: EdgeInsets.fromLTRB(20, 31, 20, 20),

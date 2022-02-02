@@ -145,7 +145,7 @@ class LoginState extends State<Login> {
                             InkWell(
                                 onTap: () =>
                                     // Get.to((CompleteRegistration())),
-                                    Navigator.pushNamed(context, RegisterRoute),
+                                    Navigator.pushNamed(context, UserTypesRoute),
                                 child: Text('Sign Up',
                                     style: TextStyle(
                                         fontSize: 14,
