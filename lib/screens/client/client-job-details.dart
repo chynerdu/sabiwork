@@ -15,6 +15,7 @@ import 'package:sabiwork/models/allJobsModel.dart';
 import 'package:sabiwork/models/applicantsModel.dart';
 import 'package:sabiwork/models/applyJobModel.dart';
 import 'package:sabiwork/models/myJobsModel.dart';
+import 'package:sabiwork/screens/chat/chat-room.dart';
 import 'package:sabiwork/screens/client/service-provider-profile.dart';
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/job_service.dart';
@@ -143,6 +144,15 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
         false;
   }
 
+  void handleClick(String value) {
+    switch (value) {
+      case 'Close Job':
+        break;
+      case 'Delete':
+        break;
+    }
+  }
+
   Widget build(BuildContext context) {
     ClientJobDetailsController clientC = Get.put(ClientJobDetailsController());
     return Scaffold(
@@ -150,7 +160,19 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           iconTheme: IconThemeData(color: Color(0xff888888)),
-          actions: [GestureDetector(child: Icon(Icons.more_vert))],
+          actions: [
+            PopupMenuButton<String>(
+              onSelected: handleClick,
+              itemBuilder: (BuildContext context) {
+                return {'Close Job', 'Delete'}.map((String choice) {
+                  return PopupMenuItem<String>(
+                    value: choice,
+                    child: Text(choice),
+                  );
+                }).toList();
+              },
+            ),
+          ],
         ),
         body: Container(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -601,7 +623,14 @@ class UserCard extends StatelessWidget {
                         icon: Icon(Icons.reply,
                             color: Color(0xffBD4300), size: 13),
                         title: 'Reply',
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ChatRoom('2', 'General', '3433r3r3'),
+                              ));
+                        },
                       ),
                     ),
                     SizedBox(width: 17),
