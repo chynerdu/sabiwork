@@ -6,15 +6,22 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/rendering.dart';
+import 'package:get/get.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:sabiwork/common/profileImage.dart';
 import 'package:sabiwork/helpers/customColors.dart';
+import 'package:sabiwork/models/messagesModel.dart';
+import 'package:sabiwork/models/userModel.dart';
+import 'package:sabiwork/services/getStates.dart';
+import 'package:sabiwork/services/messages_service.dart';
+import 'package:sabiwork/services/socket_service.dart';
 
 class ChatRoom extends StatefulWidget {
   // final MainAppProvider provider;
-  final dynamic groupId;
-  final String groupLabel;
-  final dynamic storeId;
-  ChatRoom(this.groupId, this.groupLabel, this.storeId);
+  final UserModel user;
+  ChatRoom({
+    required this.user,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -28,6 +35,8 @@ class ChatRoomState extends State<ChatRoom> {
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _chatController = TextEditingController();
   ScrollController _chatScrollController = ScrollController();
+  SocketConnection socketConnection = SocketConnection();
+  MessageService messageService = MessageService();
   var previousCursorPosition;
 
   List<Map<String, dynamic>> messages = [
@@ -63,22 +72,47 @@ class ChatRoomState extends State<ChatRoom> {
     },
   ];
 
-  // initState() {
-  //   print('length ${widget.provider.groupChatMessageList.length}');
-  //   super.initState();
-  // }
+  initState() {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      socketConnection.startConnection();
+    });
+
+    getMessages();
+
+    super.initState();
+  }
+
+  void _scrollDown() {
+    _chatScrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
 
   @override
   void dispose() {
     _focusNode.dispose();
+    socketConnection.disconnectSocket();
+    _chatScrollController.removeListener(() {
+      _chatScrollController.dispose();
+    });
+    messageService.fetchRecentChats();
     super.dispose();
   }
 
-  next() {
-    sendMessage();
+  getMessages() async {
+    await messageService.fetchMessage(recipientId: widget.user.id);
   }
 
-  sendMessage() {
+  sendMessage(message) {
+    socketConnection.sendMessage(
+        message: _chatController.text, recipientId: widget.user.id);
+    setState(() {
+      _chatController.text = '';
+      _scrollDown();
+    });
+
     // if (_chatController.text == '') {
     //   return;
     // }
@@ -192,7 +226,10 @@ class ChatRoomState extends State<ChatRoom> {
                 cursorColor: Colors.black45,
                 focusNode: _focusNode,
                 controller: _chatController,
-                style: TextStyle(color: Colors.black87, fontSize: 17),
+                style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18),
                 decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Type your message...',
@@ -257,6 +294,7 @@ class ChatRoomState extends State<ChatRoom> {
 
   Widget buildChatForm() {
     return Container(
+        margin: EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           // borderRadius: const BorderRadius.only(
@@ -274,89 +312,129 @@ class ChatRoomState extends State<ChatRoom> {
               child: buildtextFormField(),
             ),
             Container(
-                width: MediaQuery.of(context).size.width * 0.25,
-                child: Row(
-                  children: [
-                    // buildEMojiPicker(),
-                    IconButton(
-                      icon: Icon(Icons.send, color: CustomColors.ButtonColor),
-                      onPressed: () {
-                        next();
-                        // sendMessage(model.sendMessage);
-                        // Navigator.pushNamed<bool>(
-                        //   context, '/login'
-                        // );
-                      },
-                    ),
-                    GestureDetector(
-                      child: Text('😀', style: TextStyle(fontSize: 17)),
-                      onTap: () {
-                        // hide keyboard
-                        if (showEmojiKeyboard) {
-                          _focusNode.requestFocus();
-                          setState(() {
-                            showEmojiKeyboard = false;
-                          });
-                        } else {
-                          FocusScope.of(context).requestFocus(new FocusNode());
-                          setState(() {
-                            showEmojiKeyboard = true;
-                            // _chatController.selection.start;
-                          });
-                        }
-                      },
-                    )
-                  ],
-                ))
+              width: MediaQuery.of(context).size.width * 0.25,
+              child: IconButton(
+                icon: Icon(Icons.send, color: CustomColors.ButtonColor),
+                onPressed: () {
+                  if (_chatController.text == '') {
+                    return;
+                  } else {
+                    // next();
+                    sendMessage(_chatController.text);
+                  }
+                  // Navigator.pushNamed<bool>(
+                  //   context, '/login'
+                  // );
+                },
+              ),
+              //  Row(
+              //   children: [
+              //     // buildEMojiPicker(),
+              //     IconButton(
+              //       icon: Icon(Icons.send, color: CustomColors.ButtonColor),
+              //       onPressed: () {
+              //         if (_chatController.text == '') {
+              //           return;
+              //         } else {
+              //           // next();
+              //           sendMessage(_chatController.text);
+              //         }
+              //         // Navigator.pushNamed<bool>(
+              //         //   context, '/login'
+              //         // );
+              //       },
+              //     ),
+              //     // GestureDetector(
+              //     //   child: Text('😀', style: TextStyle(fontSize: 17)),
+              //     //   onTap: () {
+              //     //     // hide keyboard
+              //     //     if (showEmojiKeyboard) {
+              //     //       _focusNode.requestFocus();
+              //     //       setState(() {
+              //     //         showEmojiKeyboard = false;
+              //     //       });
+              //     //     } else {
+              //     //       FocusScope.of(context).requestFocus(new FocusNode());
+              //     //       setState(() {
+              //     //         showEmojiKeyboard = true;
+              //     //         // _chatController.selection.start;
+              //     //       });
+              //     //     }
+              //     //   },
+              //     // )
+              //   ],
+              // )
+            )
           ],
         ));
   }
 
   Widget buildMessageBody() {
-    return Container(
+    Controller c = Get.put(Controller());
+    return Obx(() => Container(
         height: MediaQuery.of(context).size.height * 0.68 +
             MediaQuery.of(context).viewInsets.bottom,
         margin: EdgeInsets.only(top: 20, bottom: 7),
         padding: EdgeInsets.only(bottom: 60),
-        child: ListView.builder(
-          controller: _chatScrollController,
-          // reverse: true,
-          shrinkWrap: true,
-          // itemCount: 4,
-          itemCount: messages.length,
-          itemBuilder: (context, index) {
-            final message = messages[index];
-            print('message $message');
-            // print('projects $project');
-            // if (project.id != 1) {
-            return Container(
-              padding: EdgeInsets.only(bottom: 10),
-              child: message['issender'] == true
-                  ? Container(
-                      padding: EdgeInsets.only(bottom: 0, right: 15),
-                      child: Align(
-                          alignment: Alignment(0.9, -0.9),
-                          child: buildSenderConversationBody(
-                              message['message'], '05:30')))
-                  : Container(
-                      padding: EdgeInsets.only(bottom: 0, left: 15),
-                      child: Align(
-                          alignment: Alignment.topLeft,
-                          child: buildReceiverConversationBody(
-                              message['message'], "Ayodele", "6:30"))),
-            );
-            // } else {
-            //   return Container(
-            //     padding: EdgeInsets.only(bottom: 40),
-            //     child: Align(
-            //       alignment: Alignment.topLeft,
-            //       child: buildReceiverConversationBody('${project.body}')
-            //     )
-            //   );
-            // }
-            // return MemberItem(project, index, model);
-          },
-        ));
+        child:
+            //  c.isFetchingMessage.value
+            //     ? Center(
+            //         child: CircularProgressIndicator(
+            //           color: CustomColors.PrimaryColor,
+            //         ),
+            //       )
+            //     :
+            c.allMessages.value.result == null
+                ? Center(
+                    child: Text(
+                        'You have not started a conversation with ${widget.user.firstName}'))
+                : ListView.builder(
+                    controller: _chatScrollController,
+                    reverse: true,
+                    shrinkWrap: true,
+                    // itemCount: 4,
+                    itemCount: c.allMessages.value.result!.data!.length,
+                    // messages.length,
+                    itemBuilder: (context, index) {
+                      Data message = c.allMessages.value.result!.data![index];
+                      print('message $message');
+                      // print('projects $project');
+                      // if (project.id != 1) {
+                      return Container(
+                        padding: EdgeInsets.only(bottom: 10),
+                        child: message.senderId == c.userData.value.id
+                            ? Container(
+                                padding: EdgeInsets.only(bottom: 0, right: 15),
+                                child: Align(
+                                    alignment: Alignment(0.9, -0.9),
+                                    child: buildSenderConversationBody(
+                                      message.message,
+                                      Jiffy(message.createdAt ?? DateTime.now())
+                                          .fromNow(),
+                                    )))
+                            : Container(
+                                padding: EdgeInsets.only(bottom: 0, left: 15),
+                                child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: buildReceiverConversationBody(
+                                        message.message,
+                                        "${widget.user.firstName}",
+                                        Jiffy(message.createdAt ??
+                                                DateTime.now())
+                                            .fromNow()))),
+                      );
+                      // } else {
+                      //   return Container(
+                      //     padding: EdgeInsets.only(bottom: 40),
+                      //     child: Align(
+                      //       alignment: Alignment.topLeft,
+                      //       child: buildReceiverConversationBody('${project.body}')
+                      //     )
+                      //   );
+                      // }
+                      // return MemberItem(project, index, model);
+                    },
+                  )));
   }
 
   Widget buildSenderConversationBody(message, time) {
@@ -388,7 +466,7 @@ class ChatRoomState extends State<ChatRoom> {
                         //       Color(0xff1763DD),
                         //       Color(0xff4575f0),
                         //     ])
-                        color: Color(0xff983701).withOpacity(0.2),
+                        color: Color(0xff983701).withOpacity(0.9),
                       ),
                       padding: EdgeInsets.only(
                           left: 15, right: 15, top: 10, bottom: 10),
@@ -398,7 +476,7 @@ class ChatRoomState extends State<ChatRoom> {
                           Text(message,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF555555),
+                                color: Color.fromARGB(255, 248, 248, 248),
                                 fontWeight: FontWeight.w600,
                               )),
                           // SizedBox(height: 5),
@@ -425,7 +503,7 @@ class ChatRoomState extends State<ChatRoom> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Card(
-                  color: Color(0xFFE5E5E5),
+                  color: Color.fromARGB(255, 47, 47, 47).withOpacity(0.98),
                   shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.only(
                         topLeft: const Radius.circular(25.0),
@@ -443,12 +521,13 @@ class ChatRoomState extends State<ChatRoom> {
                         children: <Widget>[
                           Text('$sender',
                               style: TextStyle(
-                                  fontSize: 12, color: Colors.black87)),
+                                  fontSize: 12,
+                                  color: Color.fromARGB(221, 255, 255, 255))),
                           SizedBox(height: 5),
                           Text('$message',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xff888888),
+                                color: Color.fromARGB(255, 239, 239, 239),
                                 fontWeight: FontWeight.w600,
                               )),
                         ],
@@ -458,60 +537,6 @@ class ChatRoomState extends State<ChatRoom> {
                   child: Text('$time',
                       style: TextStyle(fontSize: 12, color: Colors.black87)))
             ]));
-  }
-
-  Widget buildMessageBody1() {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.68,
-      child: ListView(
-        children: <Widget>[
-          // Container(
-          //     padding: EdgeInsets.only(bottom: 15, left: 15),
-          //     child: Align(
-          //         alignment: Alignment.topLeft,
-          //         child: buildReceiverConversationBody(
-          //             'Hello! 👋 Is there anything I can do to help you with your discount codes?'))),
-
-          Container(
-              padding: EdgeInsets.only(bottom: 15, right: 15),
-              child: Align(
-                  alignment: Alignment(0.9, -0.9),
-                  child: buildSenderConversationBody(
-                      "I need a really good dress for the winter formal. What do you think about the new dress i just posted? I think its fire! 🔥",
-                      '12:20 PM'))),
-          Container(
-              padding: EdgeInsets.only(bottom: 15, left: 15),
-              child: Align(
-                  alignment: Alignment.topLeft,
-                  child: buildReceiverConversationBody(
-                      "Love the dress! 👗", 'Olivia', '12:30 PM'))),
-
-          Container(
-              padding: EdgeInsets.only(bottom: 15, left: 15),
-              child: Align(
-                  alignment: Alignment.topLeft,
-                  child: buildReceiverConversationBody(
-                      "That dress will look great on you! 😍",
-                      'Amelia',
-                      '12:35 PM'))),
-          Container(
-              padding: EdgeInsets.only(bottom: 15, right: 15),
-              child: Align(
-                  alignment: Alignment(0.9, -0.9),
-                  child: buildSenderConversationBody(
-                      "Oh okay! I'll check it out and let you know what i think about it",
-                      '12:55 PM'))),
-
-          // Container(
-          // padding: EdgeInsets.only(bottom: 40),
-          // child: Align(
-          //   alignment: Alignment(-0.9, -0.9),
-          //   child: Text('hello', style: KontactTheme.headline),
-          // )
-          // ),
-        ],
-      ),
-    );
   }
 
   Widget build(BuildContext context) {
@@ -540,14 +565,19 @@ class ChatRoomState extends State<ChatRoom> {
                       backgroundColor: CustomColors.PrimaryColor,
                       elevation: 0,
                       leading: GestureDetector(
+                          onTap: () => Navigator.pop(context),
                           child: Icon(Icons.arrow_back_ios, size: 18)),
                       title: Container(
                           child: Row(
                         children: [
                           SizedBox(
-                              width: 30, height: 30, child: ProfileImage()),
+                              width: 30,
+                              height: 30,
+                              child: UsersProfileImageSAvatarx2(
+                                  user: widget.user)),
                           SizedBox(width: 10),
-                          Text('Chinedu Uche',
+                          Text(
+                              '${widget.user.firstName} ${widget.user.lastName}',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold))
                         ],

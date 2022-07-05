@@ -30,7 +30,8 @@ class MyJobData {
   List<String>? shortlistedApplicants;
   String? sId;
   List<String>? jobImages;
-
+  String? jobStatus;
+  String? isActive;
   String? description;
   String? additionalDetails;
   dynamic numberOfWorkers;
@@ -50,6 +51,8 @@ class MyJobData {
       this.sId,
       this.jobImages,
       this.description,
+      this.jobStatus,
+      this.isActive,
       this.additionalDetails,
       this.numberOfWorkers,
       this.pricePerWorker,
@@ -69,6 +72,8 @@ class MyJobData {
     sId = json['_id'];
     lga = json['lga'] == 'null' ? 'Not specified' : json['lga'];
     state = json['state'] ?? '';
+    jobStatus = json['jobStatus'] ?? 'Closed';
+    isActive = json['isActive'];
     address = json['address'];
     description = json['description'] ?? '-';
     additionalDetails = json['additionalDetails'] ?? 'No additional details';
@@ -89,6 +94,8 @@ class MyJobData {
     data['_id'] = this.sId;
     data['lga'] = this.lga;
     data['state'] = this.state;
+    data['jobStatus'] = this.jobStatus;
+    data['isActive'] = this.isActive;
     data['address'] = this.address;
     data['description'] = this.description;
     data['additionalDetails'] = this.additionalDetails;

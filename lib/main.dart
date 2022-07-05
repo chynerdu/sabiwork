@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +10,7 @@ import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/common/router.dart' as router;
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/services/getStates.dart';
+import 'package:sabiwork/services/job_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +56,7 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  JobService jobService = JobService();
 
   void initState() {
     initFlutterLocalNotification();
@@ -94,11 +98,15 @@ class MyAppState extends State<MyApp> {
 
 //  init local notification before listening to message
     FirebaseMessaging.onMessage.listen((RemoteMessage event) async {
-      print("message recieved 2");
-
+      var body = json.decode(event.notification!.body as String)['body'];
       callNotifification(event, channel);
-      print("message recieved");
-      print(event.notification!.body);
+      print("message recieved $body");
+
+      if (body['type'] == 'chat') {
+        jobService.fetchAllJobs();
+        jobService.fetchMyJobs();
+        jobService.fetchApprovedJobs();
+      }
     });
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       print('Message clicked!');
@@ -121,7 +129,7 @@ class MyAppState extends State<MyApp> {
       flutterLocalNotificationsPlugin.show(
           notification.hashCode,
           notification.title,
-          notification.body,
+          json.decode(notification.body as String)['body']['body'],
           NotificationDetails(
             android: AndroidNotificationDetails(
               channel.id, channel.name,

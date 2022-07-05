@@ -9,6 +9,7 @@ import 'package:sabiwork/models/signinModel.dart';
 import 'package:sabiwork/models/signupModel.dart';
 import 'package:sabiwork/models/userModel.dart';
 import 'package:sabiwork/services/getStates.dart';
+import 'package:sabiwork/services/socket_service.dart';
 
 import 'api_path.dart';
 import 'http_instance.dart';
@@ -25,6 +26,7 @@ class AuthService {
   final _service = HttpInstance.instance;
   late FirebaseMessaging messaging;
   FirebaseSubscribeModel firebaseSubscribeModel = FirebaseSubscribeModel();
+  SocketConnection socketConnection = SocketConnection();
 
   Future signIn(SigninModel payload) async {
     final authResult = await _service.postData(APIPath.userSignIn(), payload);
@@ -79,6 +81,7 @@ class AuthService {
     final decodedData = UserModel.fromJson(result['result']['data']);
     c.setUserData(decodedData);
     initFirebase('443');
+
     print('result : $result');
 
     return decodedData;
@@ -97,7 +100,7 @@ class AuthService {
 
   Future fetchStates() async {
     Controller c = Get.put(Controller());
-    c.updateJobFetchStatus(true);
+
     final result = await _service.getData(path: APIPath.states());
 
     print('result : $result');
@@ -107,7 +110,7 @@ class AuthService {
 
   Future fetchLGA(id) async {
     Controller c = Get.put(Controller());
-    c.updateJobFetchStatus(true);
+
     final result = await _service.getData(path: APIPath.lga(id));
 
     print('result : $result');

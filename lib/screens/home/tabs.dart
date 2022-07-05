@@ -10,6 +10,8 @@ import 'package:sabiwork/helpers/appTourTargets.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/screens/chat/chat-list.dart';
 import 'package:sabiwork/screens/chat/chat-room.dart';
+import 'package:sabiwork/screens/client/add-job.dart';
+import 'package:sabiwork/screens/client/client-dashboard.dart';
 import 'package:sabiwork/screens/client/client-jobs.dart';
 
 import 'package:sabiwork/screens/serviceProvider/dashboard_serviceprod.dart';
@@ -17,6 +19,7 @@ import 'package:sabiwork/screens/serviceProvider/jobs.dart';
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/job_service.dart';
 import 'package:sabiwork/services/localStorage.dart';
+import 'package:sabiwork/services/messages_service.dart';
 
 class Tabs extends StatelessWidget {
   Widget build(BuildContext context) {
@@ -45,10 +48,10 @@ class TabsMain extends StatefulWidget {
   }
 }
 
-class TabsState extends State<TabsMain> {
+class TabsState extends State<TabsMain> with AutomaticKeepAliveClientMixin {
   JobService jobService = JobService();
-  // int _selectedIndex = 0;
-  // VisitService visitService = VisitService();
+  MessageService messageService = MessageService();
+
   AppTourTargets appTourTargets = AppTourTargets();
   LocalStorage localStorage = LocalStorage();
   GlobalKey myJobsKey = GlobalKey();
@@ -62,14 +65,24 @@ class TabsState extends State<TabsMain> {
     });
   }
 
+  @override
+  bool get wantKeepAlive => true;
+
   void initState() {
-    // Controller c = Get.put(Controller());
+    Controller c = Get.put(Controller());
     // _selectedIndex = c.activeTab.value;
     // fetchVisitHistory();
     // fetchVisitRequests();
-    jobService.fetchAllJobs();
-    jobService.fetchMyJobs();
-    jobService.fetchApprovedJobs();
+    if (c.userData.value.role == "service-provider") {
+      jobService.fetchAllJobs();
+      jobService.fetchAppliedJobs();
+    } else {
+      jobService.fetchMyOpenJobs();
+      jobService.fetchMyJobs();
+      jobService.fetchApprovedJobs();
+    }
+
+    messageService.fetchRecentChats();
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       appTourTargets.addTargets(
         context: context,
@@ -141,17 +154,17 @@ class TabsState extends State<TabsMain> {
     ServiceProviderDashboard(),
     JobMain(),
     ChatList(),
-    Container(child: Center(child: Text('Notification Coming soon'))),
+    // Container(child: Center(child: Text('Notification Coming soon'))),
     Container(child: Center(child: Text('Money Coming soon'))),
     // Container(child: Center(child: Text('Community Coming soon'))),
     // ResidentServiceScreen()
   ];
 
   List<Widget> _clientWidgetOptions = <Widget>[
-    ServiceProviderDashboard(),
+    ClientDashboard(),
     ClientJobMain(),
+    AddJob(),
     ChatList(),
-    Container(child: Center(child: Text('Notification Coming soon'))),
     Container(child: Center(child: Text('Money Coming soon'))),
     // Container(child: Center(child: Text('Community Coming soon'))),
     // ResidentServiceScreen()
@@ -185,17 +198,31 @@ class TabsState extends State<TabsMain> {
                     color: Color(0xff983701)),
                 label: 'Jobs',
               ),
+              if (c.userData.value.role != "service-provider")
+                BottomNavigationBarItem(
+                  icon: Container(
+                      decoration: BoxDecoration(
+                          color: Color(0xff8D8D8D),
+                          borderRadius: BorderRadius.circular(2)),
+                      child: Icon(
+                        Icons.add_outlined,
+                        color: Colors.white,
+                      )),
+                  // SvgPicture.asset('assets/icons/chat.svg'),
+                  activeIcon: Container(
+                      decoration: BoxDecoration(
+                          color: Color(0xff983701),
+                          borderRadius: BorderRadius.circular(2)),
+                      child: Icon(Icons.add, color: Colors.white)),
+                  //  SvgPicture.asset('assets/icons/notifications.svg',
+                  //     color: Color(0xff983701)),
+                  label: 'New',
+                ),
               BottomNavigationBarItem(
                 icon: SvgPicture.asset('assets/icons/chat.svg'),
                 activeIcon: SvgPicture.asset('assets/icons/chat.svg',
                     color: Color(0xff983701)),
-                label: 'Chat',
-              ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset('assets/icons/notifications.svg'),
-                activeIcon: SvgPicture.asset('assets/icons/notifications.svg',
-                    color: Color(0xff983701)),
-                label: 'Notifications',
+                label: 'Messages',
               ),
               BottomNavigationBarItem(
                 icon: SvgPicture.asset(
@@ -204,7 +231,9 @@ class TabsState extends State<TabsMain> {
                 ),
                 activeIcon: SvgPicture.asset('assets/icons/money.svg',
                     color: Color(0xff983701)),
-                label: 'Money',
+                label: c.userData.value.role != "service-provider"
+                    ? 'Wallet'
+                    : 'Earnings',
               ),
             ],
             // currentIndex: _selectedIndex,

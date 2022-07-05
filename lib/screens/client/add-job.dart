@@ -52,6 +52,7 @@ class AddJobState extends State<AddJob> {
   List stateList = [];
   List lgaList = [];
   List<XFile>? _imageFileList = [];
+  bool usStateInProfile = false;
 
   List categoryList = [
     {"label": "Indoor"},
@@ -84,7 +85,7 @@ class AddJobState extends State<AddJob> {
 
   initState() {
     super.initState();
-
+    usStateInProfile = false;
     fetchStates();
   }
 
@@ -123,6 +124,7 @@ class AddJobState extends State<AddJob> {
   }
 
   submit(context) async {
+    FocusScope.of(context).unfocus();
     Controller c = Get.put(Controller());
 
     List<http.MultipartFile> newList = [];
@@ -186,8 +188,11 @@ class AddJobState extends State<AddJob> {
             title: 'Job Posted',
             body: 'Your job has been posted',
             context: context);
+        setState(() {
+          addjobModel = AddjobModel();
+        });
         await jobService.fetchMyJobs();
-        Get.back();
+        onItemTap();
         // Navigator.pop(context);
       } else {
         customFlushBar.showErrorFlushBar(
@@ -379,7 +384,8 @@ class AddJobState extends State<AddJob> {
                                 '${categoryList[index]['label']}',
                                 style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 17,
                                     height: 2),
                               ));
                         },
@@ -461,279 +467,338 @@ class AddJobState extends State<AddJob> {
     );
   }
 
+  void onItemTap() {
+    Controller c = Get.put(Controller());
+    setState(() {
+      // _selectedIndex = index;
+      c.updateTab(0);
+    });
+  }
+
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle.light,
-            child: SafeArea(
-                child: Container(
-                    padding: EdgeInsets.fromLTRB(20, 31, 20, 20),
-                    child: Column(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: Icon(Icons.arrow_back)),
-                          Text('Post a Job',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff555555),
-                                  fontSize: 18)),
-                          GestureDetector(child: Icon(Icons.more_vert))
-                        ],
-                      ),
-                      SizedBox(height: 49),
-                      Expanded(
-                          child: SingleChildScrollView(
-                              child: Form(
-                                  key: _formKey,
-                                  child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Job Category *',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Color(0xff4A4A4A))),
-                                        SizedBox(height: 6),
-                                        Input(
-                                          onTap: () =>
-                                              _displayCategoryDialog(context),
-                                          // enabled: false,
-                                          readOnly: true,
-                                          controller: categoryController,
-                                          hintText: 'select category',
-                                          validator: (String? value) {
-                                            if (value == '')
-                                              return 'select category';
-                                          },
-                                          onSaved: (String? value) {},
-                                        ),
-                                        SizedBox(height: 20),
-                                        Text('Title *',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Color(0xff4A4A4A))),
-                                        SizedBox(height: 6),
-                                        Input(
-                                          hintText:
-                                              'e.g I need someone to clean my house',
-                                          validator: (String? value) {
-                                            // if (value == '')
-                                            //   return 'Enter title';
-                                          },
-                                          onSaved: (String? value) {
-                                            addjobModel.description = value;
-                                          },
-                                        ),
-                                        SizedBox(height: 20),
-                                        Text('Description',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Color(0xff4A4A4A))),
-                                        SizedBox(height: 6),
-                                        Input(
-                                          maxLines: 5,
-                                          hintText: 'Describe the job',
-                                          validator: (String? value) {
-                                            if (value == '')
-                                              return 'Enter title';
-                                          },
-                                          onSaved: (String? value) {
-                                            addjobModel.additionalDetails =
-                                                value;
-                                          },
-                                        ),
-                                        SizedBox(height: 30),
-                                        GestureDetector(
-                                            onTap: () =>
-                                                _showChoiceDialog(context),
-                                            child: Row(
+    return WillPopScope(
+        onWillPop: () async {
+          onItemTap();
+          return true;
+        },
+        child: Scaffold(
+            body: AnnotatedRegion<SystemUiOverlayStyle>(
+                value: SystemUiOverlayStyle.light,
+                child: SafeArea(
+                    child: Container(
+                        padding: EdgeInsets.fromLTRB(20, 31, 20, 20),
+                        child: Column(children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                  onTap: () => onItemTap(),
+                                  // Navigator.pop(context),
+                                  child: Icon(Icons.arrow_back)),
+                              Text('Post a Job',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff555555),
+                                      fontSize: 18)),
+                              GestureDetector(child: Icon(Icons.more_vert))
+                            ],
+                          ),
+                          SizedBox(height: 49),
+                          Expanded(
+                              child: SingleChildScrollView(
+                                  child: Form(
+                                      key: _formKey,
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text('Job Category *',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Color(0xff4A4A4A))),
+                                            SizedBox(height: 6),
+                                            Input(
+                                              onTap: () =>
+                                                  _displayCategoryDialog(
+                                                      context),
+                                              // enabled: false,
+                                              readOnly: true,
+                                              controller: categoryController,
+                                              hintText: 'select category',
+                                              validator: (String? value) {
+                                                if (value == '')
+                                                  return 'select category';
+                                              },
+                                              onSaved: (String? value) {},
+                                            ),
+                                            SizedBox(height: 20),
+                                            Text('Title *',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Color(0xff4A4A4A))),
+                                            SizedBox(height: 6),
+                                            Input(
+                                              hintText:
+                                                  'e.g I need someone to clean my house',
+                                              validator: (String? value) {
+                                                // if (value == '')
+                                                //   return 'Enter title';
+                                              },
+                                              onSaved: (String? value) {
+                                                addjobModel.description = value;
+                                              },
+                                            ),
+                                            SizedBox(height: 20),
+                                            Text('Description',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Color(0xff4A4A4A))),
+                                            SizedBox(height: 6),
+                                            Input(
+                                              maxLines: 5,
+                                              hintText: 'Describe the job',
+                                              validator: (String? value) {
+                                                if (value == '')
+                                                  return 'Enter title';
+                                              },
+                                              onSaved: (String? value) {
+                                                addjobModel.additionalDetails =
+                                                    value;
+                                              },
+                                            ),
+                                            SizedBox(height: 30),
+                                            GestureDetector(
+                                                onTap: () =>
+                                                    _showChoiceDialog(context),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                        'Attach photos (Optional)',
+                                                        style: TextStyle(
+                                                            fontSize: 13,
+                                                            color: Color(
+                                                                0xff4A4A4A))),
+                                                    SizedBox(width: 19),
+                                                    SvgPicture.asset(
+                                                        'assets/icons/photo.svg')
+                                                  ],
+                                                )),
+                                            SizedBox(height: 20),
+                                            _imageFileList != null
+                                                ? _imageFileList!.length > 0
+                                                    ? Container(
+                                                        height: 200,
+                                                        child: ListView.builder(
+                                                          scrollDirection:
+                                                              Axis.horizontal,
+                                                          key: UniqueKey(),
+                                                          itemCount:
+                                                              _imageFileList!
+                                                                  .length,
+                                                          itemBuilder:
+                                                              (BuildContext
+                                                                      context,
+                                                                  index) {
+                                                            return Stack(
+                                                                children: [
+                                                                  Container(
+                                                                      padding: EdgeInsets
+                                                                          .fromLTRB(
+                                                                              5,
+                                                                              5,
+                                                                              15,
+                                                                              5),
+                                                                      // radius: 50,
+
+                                                                      child: Semantics(
+                                                                          label: 'job_images',
+                                                                          child: Container(
+                                                                            decoration:
+                                                                                BoxDecoration(boxShadow: [
+                                                                              BoxShadow(blurRadius: 4.0, spreadRadius: 0.3)
+                                                                            ], borderRadius: BorderRadius.circular(3), color: Colors.white),
+                                                                            child:
+                                                                                Image.file(File(_imageFileList![index].path)),
+                                                                          ))),
+                                                                  Positioned(
+                                                                      right: 3,
+                                                                      child: GestureDetector(
+                                                                          onTap: () {
+                                                                            print('index $index');
+                                                                            setState(() {
+                                                                              _imageFileList!.removeAt(index);
+                                                                            });
+                                                                          },
+                                                                          child: Icon(Icons.close_outlined, size: 20, color: Colors.red[700]))),
+                                                                ]);
+                                                          },
+                                                        ))
+                                                    : Container()
+                                                : Container(),
+                                            SizedBox(height: 40),
+                                            Row(
                                               children: [
-                                                Text('Attach photos',
+                                                Text('State',
                                                     style: TextStyle(
                                                         fontSize: 13,
                                                         color:
                                                             Color(0xff4A4A4A))),
-                                                SizedBox(width: 19),
-                                                SvgPicture.asset(
-                                                    'assets/icons/photo.svg')
+                                                Text(
+                                                    ' or use same location in profile',
+                                                    style: TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color: CustomColors
+                                                            .PrimaryColor)),
+                                                SizedBox(width: 10),
+                                                SizedBox(
+                                                    height: 22,
+                                                    width: 18,
+                                                    child: Transform.scale(
+                                                        scale: 0.9,
+                                                        child: Checkbox(
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          3)),
+                                                          value:
+                                                              usStateInProfile,
+                                                          activeColor:
+                                                              CustomColors
+                                                                  .PrimaryColor,
+                                                          onChanged:
+                                                              (bool? value) {
+                                                            print(
+                                                                'value $value');
+                                                            // This is where we update the state when the checkbox is tapped
+                                                            setState(() {
+                                                              usStateInProfile =
+                                                                  value!;
+                                                            });
+                                                          },
+                                                        ))),
                                               ],
-                                            )),
-                                        SizedBox(height: 20),
-                                        _imageFileList != null
-                                            ? _imageFileList!.length > 0
-                                                ? Container(
-                                                    height: 200,
-                                                    child: ListView.builder(
-                                                      scrollDirection:
-                                                          Axis.horizontal,
-                                                      key: UniqueKey(),
-                                                      itemCount: _imageFileList!
-                                                          .length,
-                                                      itemBuilder:
-                                                          (BuildContext context,
-                                                              index) {
-                                                        return Stack(children: [
-                                                          Container(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .fromLTRB(
-                                                                          5,
-                                                                          5,
-                                                                          15,
-                                                                          5),
-                                                              // radius: 50,
-
-                                                              child: Semantics(
-                                                                  label:
-                                                                      'job_images',
-                                                                  child:
-                                                                      Container(
-                                                                    decoration: BoxDecoration(
-                                                                        boxShadow: [
-                                                                          BoxShadow(
-                                                                              blurRadius: 4.0,
-                                                                              spreadRadius: 0.3)
-                                                                        ],
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(
-                                                                                3),
-                                                                        color: Colors
-                                                                            .white),
-                                                                    child: Image.file(File(
-                                                                        _imageFileList![index]
-                                                                            .path)),
-                                                                  ))),
-                                                          Positioned(
-                                                              right: 3,
-                                                              child:
-                                                                  GestureDetector(
-                                                                      onTap:
-                                                                          () {
-                                                                        print(
-                                                                            'index $index');
-                                                                        setState(
-                                                                            () {
-                                                                          _imageFileList!
-                                                                              .removeAt(index);
-                                                                        });
-                                                                      },
-                                                                      child: Icon(
-                                                                          Icons
-                                                                              .close_outlined,
-                                                                          size:
-                                                                              20,
-                                                                          color:
-                                                                              Colors.red[700]))),
-                                                        ]);
+                                            ),
+                                            SizedBox(height: 6),
+                                            if (usStateInProfile == false)
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Input(
+                                                      onTap: () =>
+                                                          _displayDialog(
+                                                              context),
+                                                      // enabled: false,
+                                                      readOnly: true,
+                                                      controller:
+                                                          stateController,
+                                                      hintText: 'Select state',
+                                                      validator:
+                                                          (String? value) {
+                                                        if (value == '')
+                                                          return 'Select state';
                                                       },
-                                                    ))
-                                                : Container()
-                                            : Container(),
-                                        SizedBox(height: 40),
-                                        Text('State *',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Color(0xff4A4A4A))),
-                                        SizedBox(height: 6),
-                                        Input(
-                                            onTap: () =>
-                                                _displayDialog(context),
-                                            // enabled: false,
-                                            readOnly: true,
-                                            controller: stateController,
-                                            hintText: 'Select state',
-                                            validator: (String? value) {
-                                              if (value == '')
-                                                return 'Select state';
-                                            },
-                                            onSaved: (String? value) {},
-                                            suffixIcon: Icon(
-                                                Icons.keyboard_arrow_down)),
-                                        SizedBox(height: 20),
-                                        Text('Local Government *',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Color(0xff4A4A4A))),
-                                        SizedBox(height: 6),
-                                        Input(
-                                            onTap: () =>
-                                                _displayLGADialog(context),
-                                            enabled: stateController.text != ''
-                                                ? true
-                                                : false,
-                                            readOnly: true,
-                                            controller: lgaController,
-                                            hintText: 'Select local government',
-                                            validator: (String? value) {
-                                              if (value == '')
-                                                return 'Select local government';
-                                            },
-                                            onSaved: (String? value) {},
-                                            suffixIcon: Icon(
-                                                Icons.keyboard_arrow_down)),
-                                        SizedBox(height: 20),
-                                        Text('Adress *',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Color(0xff4A4A4A))),
-                                        SizedBox(height: 6),
-                                        Input(
-                                          hintText: 'Enter address',
-                                          validator: (String? value) {
-                                            if (value == '')
-                                              return 'Enter address';
-                                          },
-                                          onSaved: (String? value) {
-                                            addjobModel.address = value;
-                                          },
-                                        ),
-                                        SizedBox(height: 20),
-                                        Text('Budget *',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Color(0xff4A4A4A))),
-                                        SizedBox(height: 6),
-                                        Input(
-                                          keyboard: KeyboardType.NUMBER,
-                                          hintText:
-                                              'What is your budget for this job (Per person)',
-                                          validator: (String? value) {
-                                            if (value == '')
-                                              return 'Enter budget';
-                                          },
-                                          onSaved: (String? value) {
-                                            addjobModel.pricePerWorker = value;
-                                          },
-                                        ),
-                                        SizedBox(height: 20),
-                                        Text('No of Workers *',
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                color: Color(0xff4A4A4A))),
-                                        SizedBox(height: 6),
-                                        Input(
-                                          keyboard: KeyboardType.NUMBER,
-                                          hintText:
-                                              'How many people do you need',
-                                          validator: (String? value) {
-                                            if (value == '')
-                                              return 'Enter number of workers';
-                                          },
-                                          onSaved: (String? value) {
-                                            addjobModel.numberOfWorkers = value;
-                                          },
-                                        ),
-                                        SizedBox(height: 42),
-                                        SWbutton(
-                                          title: 'Post Job',
-                                          onPressed: () {
-                                            submit(context);
-                                          },
-                                        ),
-                                      ]))))
-                    ])))));
+                                                      onSaved:
+                                                          (String? value) {},
+                                                      suffixIcon: Icon(Icons
+                                                          .keyboard_arrow_down)),
+                                                  SizedBox(height: 20),
+                                                  Text('Local Government *',
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: Color(
+                                                              0xff4A4A4A))),
+                                                  SizedBox(height: 6),
+                                                  Input(
+                                                      onTap: () =>
+                                                          _displayLGADialog(
+                                                              context),
+                                                      enabled:
+                                                          stateController
+                                                                      .text !=
+                                                                  ''
+                                                              ? true
+                                                              : false,
+                                                      readOnly: true,
+                                                      controller: lgaController,
+                                                      hintText:
+                                                          'Select local government',
+                                                      validator:
+                                                          (String? value) {
+                                                        if (value == '')
+                                                          return 'Select local government';
+                                                      },
+                                                      onSaved:
+                                                          (String? value) {},
+                                                      suffixIcon: Icon(Icons
+                                                          .keyboard_arrow_down)),
+                                                  SizedBox(height: 20),
+                                                ],
+                                              ),
+                                            Text('Adress *',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Color(0xff4A4A4A))),
+                                            SizedBox(height: 6),
+                                            Input(
+                                              hintText: 'Enter address',
+                                              validator: (String? value) {
+                                                if (value == '')
+                                                  return 'Enter address';
+                                              },
+                                              onSaved: (String? value) {
+                                                addjobModel.address = value;
+                                              },
+                                            ),
+                                            SizedBox(height: 20),
+                                            Text('No of Workers *',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Color(0xff4A4A4A))),
+                                            SizedBox(height: 6),
+                                            Input(
+                                              keyboard: KeyboardType.NUMBER,
+                                              hintText:
+                                                  'How many people do you need',
+                                              validator: (String? value) {
+                                                if (value == '')
+                                                  return 'Enter number of workers';
+                                              },
+                                              onSaved: (String? value) {
+                                                addjobModel.numberOfWorkers =
+                                                    value;
+                                              },
+                                            ),
+                                            SizedBox(height: 20),
+                                            Text('Budget *',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Color(0xff4A4A4A))),
+                                            SizedBox(height: 6),
+                                            Input(
+                                              keyboard: KeyboardType.NUMBER,
+                                              hintText:
+                                                  'What is your budget for this job (Per person)',
+                                              validator: (String? value) {
+                                                if (value == '')
+                                                  return 'Enter budget';
+                                              },
+                                              onSaved: (String? value) {
+                                                addjobModel.pricePerWorker =
+                                                    value;
+                                              },
+                                            ),
+                                            SizedBox(height: 42),
+                                            SWbutton(
+                                              title: 'Post Job',
+                                              onPressed: () {
+                                                submit(context);
+                                              },
+                                            ),
+                                          ]))))
+                        ]))))));
   }
 }

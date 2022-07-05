@@ -7,6 +7,42 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:111437301916:android:0fa353397b05094cf2c559",
+        "android_client_info": {
+          "package_name": "com.app.sabiwork"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111437301916-2afqcuqe9ho6inn72prfaha1vp3us0ng.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAv6Id1AOFeXtjzoAnx_ReEkUD9ykCstGI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111437301916-2afqcuqe9ho6inn72prfaha1vp3us0ng.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "111437301916-ogrrcelt66v5uohh68ouahi0j717d6qt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.sabiwork"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:111437301916:android:e4e896bcdbe5aa79f2c559",
         "android_client_info": {
           "package_name": "com.example.sabiwork"
@@ -29,6 +65,13 @@
             {
               "client_id": "111437301916-2afqcuqe9ho6inn72prfaha1vp3us0ng.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "111437301916-ogrrcelt66v5uohh68ouahi0j717d6qt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.sabiwork"
+              }
             }
           ]
         }

@@ -64,7 +64,7 @@ class JobDetailsState extends State<JobDetails> {
               //   style: TextStyle(color: CustomColors.PrimaryColor),
               // ),
               content: Container(
-                height: 200,
+                height: 230,
                 child: Form(
                     key: _formKey,
                     child: Column(
@@ -79,7 +79,7 @@ class JobDetailsState extends State<JobDetails> {
                           ),
                           SizedBox(
                               child: TextFormField(
-                                  maxLines: 5,
+                                  maxLines: 4,
                                   onSaved: (String? value) {
                                     applyJobModel.message = value;
                                   },
@@ -130,7 +130,7 @@ class JobDetailsState extends State<JobDetails> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           iconTheme: IconThemeData(color: Color(0xff888888)),
-          actions: [GestureDetector(child: Icon(Icons.more_vert))],
+          // actions: [GestureDetector(child: Icon(Icons.more_vert))],
         ),
         body: Container(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -315,11 +315,12 @@ class JobDetailsState extends State<JobDetails> {
                 // Description
                 Divider(),
                 SizedBox(height: 17),
-                Text('About Hirer',
+                Text('Posted by',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     )),
+                Divider(),
                 SizedBox(height: 11),
                 ListTile(
                   contentPadding: EdgeInsets.only(left: 0),
@@ -342,13 +343,20 @@ class JobDetailsState extends State<JobDetails> {
                   ),
                 ),
                 SizedBox(height: 17),
-                Text(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisi lectus diam, amet, ullamcorper egestas iaculis. Id neque, morbi sit ultrices imperdiet diam malesuada nulla. Pellentesque facilisis congue ac ligula faucibus amet viverra. Vel lectus pharetra erat metus quis amet rhoncus eget. Egestas id semper massa porttitor ac, at pretium. Commodo, tincidunt cras pretium augue proin sollicitudin tellus aliquam. Erat mi id dolor nisl nec sed facilisi.',
+                // Text(
+                //     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisi lectus diam, amet, ullamcorper egestas iaculis. Id neque, morbi sit ultrices imperdiet diam malesuada nulla. Pellentesque facilisis congue ac ligula faucibus amet viverra. Vel lectus pharetra erat metus quis amet rhoncus eget. Egestas id semper massa porttitor ac, at pretium. Commodo, tincidunt cras pretium augue proin sollicitudin tellus aliquam. Erat mi id dolor nisl nec sed facilisi.',
+                //     style: TextStyle(
+                //       fontSize: 13,
+                //       color: Color(0xff888888),
+                //       fontWeight: FontWeight.w500,
+                //     ))
+                Divider(),
+                Text('Similar jobs',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xff888888),
                       fontWeight: FontWeight.w500,
-                    ))
+                    )),
+                Divider(),
               ],
             ))));
   }

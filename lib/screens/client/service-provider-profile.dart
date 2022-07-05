@@ -14,6 +14,8 @@ import 'package:sabiwork/helpers/flushBar.dart';
 import 'package:sabiwork/models/allJobsModel.dart';
 import 'package:sabiwork/models/applicantsModel.dart';
 import 'package:sabiwork/models/applyJobModel.dart';
+import 'package:sabiwork/models/userModel.dart';
+import 'package:sabiwork/screens/chat/chat-room.dart';
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/job_service.dart';
 
@@ -57,77 +59,6 @@ class ServiceproviderProfileState extends State<ServiceproviderProfile> {
       customFlushBar.showErrorFlushBar(
           title: 'Error occured', body: '$e', context: context);
     }
-  }
-
-  Future<bool> _apply(context) async {
-    return (await showDialog(
-          context: context,
-          builder: (context) => BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: new AlertDialog(
-              // title: new Text(
-              //   'Add a Message to your application (Optional)',
-              //   style: TextStyle(color: CustomColors.PrimaryColor),
-              // ),
-              content: Container(
-                height: 200,
-                child: Form(
-                    key: _formKey,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          new Text(
-                            'Add a Message to your application (Optional)',
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: CustomColors.PrimaryColor),
-                          ),
-                          SizedBox(
-                              child: TextFormField(
-                                  maxLines: 5,
-                                  onSaved: (String? value) {
-                                    applyJobModel.message = value;
-                                  },
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                  ),
-                                  decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                        borderSide: BorderSide(
-                                            width: 0.5,
-                                            color: Color(0xffF5F3F3)),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                        borderSide: BorderSide(
-                                            width: 0.5,
-                                            color: Color(0xffF5F3F3)),
-                                      ),
-                                      hintText:
-                                          'Write why you should be hired for this job  (e.g.: I am very good at this and very careful with items.)',
-                                      hintStyle: TextStyle(
-                                          fontSize: 13,
-                                          color: Color(0xff888888))))),
-                          SizedBox(height: 10),
-                          SizedBox(
-                              height: 33,
-                              child: SWSuttonSmall(
-                                  title: 'Send  Application',
-                                  onPressed: () {
-                                    submit(context);
-                                  }))
-                        ])),
-              ),
-
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(15)),
-            ),
-          ),
-        )) ??
-        false;
   }
 
   Widget build(BuildContext context) {
@@ -184,7 +115,14 @@ class ServiceproviderProfileState extends State<ServiceproviderProfile> {
                           width: MediaQuery.of(context).size.width * 0.3 - 22,
                           child: SWSuttonSmall(
                             title: 'Message',
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatRoom(
+                                        user: widget.applicants as UserModel),
+                                  ));
+                            },
                           ),
                         ),
                         SizedBox(width: 17),

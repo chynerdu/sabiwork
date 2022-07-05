@@ -19,6 +19,11 @@ class APIPath {
   static String profile() => '${Config.baseUrl}/auth/getMe';
   static String allJobs() => '${Config.baseUrl}/job';
   static String myJobs() => '${Config.baseUrl}/job/myJob/me';
+  static String myJob(id) => '${Config.baseUrl}/job/myJob/$id';
+  static String myOpenJobs() => '${Config.baseUrl}/job/myJob/me?jobStatus=Open';
+  static String myClosedJobs() =>
+      '${Config.baseUrl}/job/myJob/me?jobStatus=Closed';
+  static String myAppliedJobs() => '${Config.baseUrl}/job/jobs/appliedJobs';
 
   static String fetchApplicants(id) => '${Config.baseUrl}/applicants/all/$id';
   static String fetchApprovedApplicants(id) =>
@@ -32,6 +37,8 @@ class APIPath {
       '${Config.baseUrl}/applicants/approve/$id';
   static String addJob() => '${Config.baseUrl}/job';
   static String applyForJob(id) => '${Config.baseUrl}/job/$id';
+  static String allMessages(recipientId) =>
+      '${Config.baseUrl}/chat/$recipientId';
   static String startJob(id) =>
       '${Config.baseUrl}/applicants/approved/start/$id';
   static String confirmStartJob(id) =>
@@ -39,4 +46,6 @@ class APIPath {
   static String endJob(id) => '${Config.baseUrl}/applicants/approved/end/$id';
   static String confirmEndJob(id) =>
       '${Config.baseUrl}/applicants/approved/end-confirm/$id';
+
+  static String recentChats() => '${Config.baseUrl}/chat';
 }

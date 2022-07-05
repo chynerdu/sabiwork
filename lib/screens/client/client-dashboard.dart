@@ -13,24 +13,27 @@ import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/common/shimmerList.dart';
 import 'package:sabiwork/common/stacked_image.dart';
 import 'package:sabiwork/components/SWbutton.dart';
+import 'package:sabiwork/components/sabiBadges.dart';
 import 'package:sabiwork/helpers/dialogs.dart';
 import 'package:sabiwork/helpers/flushBar.dart';
 import 'package:sabiwork/models/allJobsModel.dart';
+import 'package:sabiwork/models/myJobsModel.dart' as myJob;
 import 'package:sabiwork/models/approvedJobModel.dart';
-import 'package:sabiwork/screens/serviceProvider/job-details.dart';
+import 'package:sabiwork/screens/client/client-job-details.dart';
+
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/job_service.dart';
 import 'package:sabiwork/services/socket_service.dart';
 
-class ServiceProviderDashboard extends StatefulWidget {
+class ClientDashboard extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return ServiceProviderDashboardState();
+    return ClientDashboardState();
   }
 }
 
-class ServiceProviderDashboardState extends State<ServiceProviderDashboard> {
+class ClientDashboardState extends State<ClientDashboard> {
   int tabIndex = 0;
   SocketConnection socketConnection = SocketConnection();
   final GlobalKey<ScaffoldState> _key = GlobalKey();
@@ -45,27 +48,6 @@ class ServiceProviderDashboardState extends State<ServiceProviderDashboard> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-        // appBar: AppBar(
-        //   leading: Container(
-        //     // radius: 50,
-        //     margin: EdgeInsets.only(left: 10),
-        //     width: 20,
-        //     height: 20,
-        //     decoration: BoxDecoration(
-        //         borderRadius: BorderRadius.circular(30),
-        //         image: DecorationImage(
-        //           fit: BoxFit.cover,
-        //           image: AssetImage('assets/images/danKid.jpg'),
-        //         )),
-        //   ),
-        //   title: Text('Jobs',
-        //       style: TextStyle(color: Color(0xff555555), fontSize: 18)),
-        //   backgroundColor: Colors.transparent,
-        //   elevation: 0,
-        //   centerTitle: true,
-        //   iconTheme: IconThemeData(color: Color(0xff888888)),
-        //   actions: [GestureDetector(child: Icon(Icons.more_vert))],
-        // ),
         body: Container(
             padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
             child: Column(
@@ -84,18 +66,18 @@ class ServiceProviderDashboardState extends State<ServiceProviderDashboard> {
                   ],
                 ),
                 SizedBox(height: 10),
-                Expanded(child: RecommendedJobs(c))
+                Expanded(child: RecentJobs(c))
               ],
             )));
     // });
   }
 }
 
-class RecommendedJobs extends StatelessWidget {
+class RecentJobs extends StatelessWidget {
   final _scrollController = ScrollController();
   final Controller c;
 
-  RecommendedJobs(this.c);
+  RecentJobs(this.c);
   JobService jobService = JobService();
   completedJobCount(jobs) {
     var count = jobs != null
@@ -134,7 +116,7 @@ class RecommendedJobs extends StatelessWidget {
     // _scrollController.addListener(toggleShowHeader());
 
     return RefreshIndicator(onRefresh: () async {
-      await jobService.fetchAllJobs();
+      await jobService.fetchMyOpenJobs();
       await jobService.fetchApprovedJobs();
     }, child: Obx(() {
       return
@@ -172,33 +154,33 @@ class RecommendedJobs extends StatelessWidget {
                           Text(
                               'You have ${c.allApprovedJobs.value.data?.length} active job',
                               style: TextStyle(
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w500,
                                   color: Color(0xff8D8D8D),
                                   fontSize: 14)),
                         ]),
                   SizedBox(
                     height: 34,
                   ),
-                  SizedBox(
-                      height: 40,
-                      width: MediaQuery.of(context).size.width * 0.75,
-                      child: TextFormField(
-                          decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(6),
-                                borderSide: BorderSide(
-                                    width: 0.5, color: Color(0xffAEAEAE)),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(6),
-                                borderSide: BorderSide(
-                                    width: 0.5, color: Color(0xffAEAEAE)),
-                              ),
-                              prefixIcon: Icon(Icons.search),
-                              labelText: 'Search'))),
-                  SizedBox(height: 20),
+                  // SizedBox(
+                  //     height: 40,
+                  //     width: MediaQuery.of(context).size.width * 0.75,
+                  //     child: TextFormField(
+                  //         decoration: InputDecoration(
+                  //             filled: true,
+                  //             fillColor: Colors.white,
+                  //             focusedBorder: OutlineInputBorder(
+                  //               borderRadius: BorderRadius.circular(6),
+                  //               borderSide: BorderSide(
+                  //                   width: 0.5, color: Color(0xffAEAEAE)),
+                  //             ),
+                  //             enabledBorder: OutlineInputBorder(
+                  //               borderRadius: BorderRadius.circular(6),
+                  //               borderSide: BorderSide(
+                  //                   width: 0.5, color: Color(0xffAEAEAE)),
+                  //             ),
+                  //             prefixIcon: Icon(Icons.search),
+                  //             labelText: 'Search'))),
+                  // SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -279,7 +261,7 @@ class RecommendedJobs extends StatelessWidget {
                                     fontSize: 14)))
                       ]),
                   SizedBox(height: 16),
-                  c.isFetchingJobs.value && c.allApprovedJobs.value.data == null
+                  c.isFetchingJobs.value && c.allApprovedJobs.value.data != null
                       ? ShimmerRow()
                       : c.allApprovedJobs.value.data != null &&
                               c.allApprovedJobs.value.data!.length > 0
@@ -315,13 +297,13 @@ class RecommendedJobs extends StatelessWidget {
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Recommended for you',
+                        Text('Recent',
                             style: TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xff333333),
                                 fontSize: 20)),
                         GestureDetector(
-                            onTap: () => c.updateTab(1),
+                            // onTap: () => c.updateTab(1),
                             child: Text('View All',
                                 style: TextStyle(
                                     fontWeight: FontWeight.w500,
@@ -329,12 +311,27 @@ class RecommendedJobs extends StatelessWidget {
                                     fontSize: 14)))
                       ]),
                   SizedBox(height: 16),
-                  c.isFetchingJobs.value && c.allJobs.value.data == null
+                  c.isFetchingJobs.value && c.myOpenJobs.value.data == null
                       ? ShimmerList()
-                      : Column(
-                          children: c.allJobs.value.data!
-                              .map((Data e) => JobCard(job: e))
-                              .toList())
+                      : c.myOpenJobs.value.data == null
+                          ? Center(
+                              child: Column(children: [
+                                Lottie.asset('assets/images/no-message.json',
+                                    fit: BoxFit.fill, width: 150, height: 150),
+                                Text('You have no open job',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff333333),
+                                        fontSize: 17)),
+                                SizedBox(height: 10),
+                              ]),
+                            )
+                          : Column(
+                              children: c.myOpenJobs.value.data != null
+                                  ? c.myOpenJobs.value.data!
+                                      .map((dynamic e) => JobCard(job: e))
+                                      .toList()
+                                  : [Container()])
 
                   // SizedBox(height: 20),
                   // JobCard(),
@@ -349,7 +346,7 @@ class RecommendedJobs extends StatelessWidget {
 
 class JobCard extends StatelessWidget {
   NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
-  Data job;
+  myJob.MyJobData job;
   JobCard({required this.job});
   Widget build(BuildContext context) {
     return InkWell(
@@ -357,7 +354,7 @@ class JobCard extends StatelessWidget {
           // Navigator.push(
           //   context,
           //   MaterialPageRoute(builder: (_) => JobDetailsState)))
-          Get.to(JobDetails(job: job));
+          Get.to(ClientJobDetails(job: job));
         },
         child: Container(
             margin: EdgeInsets.only(bottom: 16),
@@ -585,7 +582,7 @@ class ApprovedJobCard extends StatelessWidget {
                           // Navigator.push(
                           //   context,
                           //   MaterialPageRoute(builder: (_) => JobDetailsState)))
-                          Get.to(JobDetails(job: job));
+                          // Get.to(ClientJobDetails(job: job));
                         },
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,

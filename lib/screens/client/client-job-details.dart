@@ -9,12 +9,14 @@ import 'package:sabiwork/common/ratingBar.dart';
 import 'package:sabiwork/common/shimmerList.dart';
 import 'package:sabiwork/common/stacked_image.dart';
 import 'package:sabiwork/components/SWbutton.dart';
+import 'package:sabiwork/components/sabiBadges.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/helpers/flushBar.dart';
 import 'package:sabiwork/models/allJobsModel.dart';
 import 'package:sabiwork/models/applicantsModel.dart';
 import 'package:sabiwork/models/applyJobModel.dart';
 import 'package:sabiwork/models/myJobsModel.dart';
+import 'package:sabiwork/models/userModel.dart';
 import 'package:sabiwork/screens/chat/chat-room.dart';
 import 'package:sabiwork/screens/client/service-provider-profile.dart';
 import 'package:sabiwork/services/getStates.dart';
@@ -48,24 +50,38 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
   }
 
   getData() async {
-    await jobService.fetchApplicants(widget.job!.sId);
     await jobService.fetchApprovedApplicants(widget.job!.sId);
+    await jobService.fetchApplicants(widget.job!.sId);
   }
 
-  submit(context) async {
+  submit(context, status) async {
     try {
-      if (!_formKey.currentState!.validate()) {
-        return;
-      }
-      _formKey.currentState!.save();
-      final result =
-          await jobService.applyForJob(applyJobModel, widget.job!.sId);
+      var payload = {"jobStatus": status};
+
+      final result = await jobService.updateMyJob(widget.job!.sId, payload);
       print('result $result');
       Navigator.pop(context);
-      customFlushBar.showSuccessFlushBar(
-          title: 'Application sent',
-          body: 'You have successfully applied for this job',
-          context: context);
+      // Navigator.pop(context);
+      status == "Closed"
+          ? customFlushBar.showSuccessFlushBar(
+              title: 'Job has been closed',
+              body: 'You have closed this job',
+              context: context)
+          : status == "Suspended"
+              ? customFlushBar.showSuccessFlushBar(
+                  title: 'Job has been suspended',
+                  body: 'You have suspended this job',
+                  context: context)
+              : customFlushBar.showSuccessFlushBar(
+                  title: 'Job has been re-opened',
+                  body: 'You have re-opened this job',
+                  context: context);
+
+      setState(() {
+        widget.job = result;
+      });
+      // Future.delayed(
+      //     const Duration(milliseconds: 500), () => Navigator.pop(context));
     } catch (e) {
       // show flushbar
       customFlushBar.showErrorFlushBar(
@@ -73,84 +89,71 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
     }
   }
 
-  Future<bool> _apply(context) async {
+  Future<bool> _apply(context, status) async {
     return (await showDialog(
           context: context,
           builder: (context) => BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
             child: new AlertDialog(
-              // title: new Text(
-              //   'Add a Message to your application (Optional)',
-              //   style: TextStyle(color: CustomColors.PrimaryColor),
-              // ),
-              content: Container(
-                height: 200,
-                child: Form(
-                    key: _formKey,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          new Text(
-                            'Add a Message to your application (Optional)',
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: CustomColors.PrimaryColor),
-                          ),
-                          SizedBox(
-                              child: TextFormField(
-                                  maxLines: 5,
-                                  onSaved: (String? value) {
-                                    applyJobModel.message = value;
-                                  },
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                  ),
-                                  decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                        borderSide: BorderSide(
-                                            width: 0.5,
-                                            color: Color(0xffF5F3F3)),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                        borderSide: BorderSide(
-                                            width: 0.5,
-                                            color: Color(0xffF5F3F3)),
-                                      ),
-                                      hintText:
-                                          'Write why you should be hired for this job  (e.g.: I am very good at this and very careful with items.)',
-                                      hintStyle: TextStyle(
-                                          fontSize: 13,
-                                          color: Color(0xff888888))))),
-                          SizedBox(height: 10),
-                          SizedBox(
-                              height: 33,
-                              child: SWSuttonSmall(
-                                  title: 'Send  Application',
-                                  onPressed: () {
-                                    submit(context);
-                                  }))
-                        ])),
+              title: new Text(
+                'Confirm action',
+                style: TextStyle(color: CustomColors.PrimaryColor),
               ),
-
+              content: new Text(
+                status == "Closed"
+                    ? 'Are you sure you want to close this job?'
+                    : status == "Suspended"
+                        ? 'Are you sure you want to suspend this job'
+                        : 'Are you sure you wan to re-open this job',
+                style: TextStyle(color: CustomColors.AshText),
+              ),
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(15)),
+              actions: <Widget>[
+                FlatButton(
+                  child: new Text(
+                    'Yes',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    submit(context, status);
+                  },
+                ),
+                FlatButton(
+                  child: new Text(
+                    'No',
+                    style: TextStyle(color: CustomColors.PrimaryColor),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+              ],
             ),
           ),
         )) ??
         false;
   }
 
-  void handleClick(String value) {
+  void handleClick(String value, context) {
     switch (value) {
       case 'Close Job':
+        _apply(context, 'Closed');
         break;
-      case 'Delete':
+      case 'Suspend Job':
+        _apply(context, 'Suspended');
+        break;
+      case 'Re-open Job':
+        _apply(context, 'Open');
         break;
     }
+  }
+
+  changeTab() {
+    setState(() {
+      tabIndex = 0;
+    });
   }
 
   Widget build(BuildContext context) {
@@ -162,9 +165,14 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
           iconTheme: IconThemeData(color: Color(0xff888888)),
           actions: [
             PopupMenuButton<String>(
-              onSelected: handleClick,
+              onSelected: (String choice) {
+                handleClick(choice, context);
+              },
               itemBuilder: (BuildContext context) {
-                return {'Close Job', 'Delete'}.map((String choice) {
+                return {
+                  widget.job!.jobStatus == "Open" ? 'Close Job' : 'Re-open Job',
+                  'Suspend Job'
+                }.map((String choice) {
                   return PopupMenuItem<String>(
                     value: choice,
                     child: Text(choice),
@@ -250,7 +258,15 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
                                     '${widget.job!.numberOfWorkers} Person(s)',
                                 color: Color(0xffe6e6e6)),
                             SabiBadges(
-                                title: 'Job open', color: Color(0xFF7AD67D))
+                              titleColor: Colors.white,
+                              title:
+                                  'Job ${widget.job!.jobStatus!.toLowerCase()} ',
+                              color: widget.job!.jobStatus == 'Open'
+                                  ? Color(0xff209B25)
+                                  : widget.job!.jobStatus == 'Suspended'
+                                      ? Color.fromARGB(255, 207, 132, 11)
+                                      : Color.fromARGB(255, 201, 20, 20),
+                            )
                           ],
                         ),
                         SizedBox(height: 20),
@@ -276,6 +292,7 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
                 SizedBox(height: 17),
                 Obx(() {
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -314,7 +331,7 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
                   return Expanded(
                     // padding: const EdgeInsets.all(20.0),
                     child: DefaultTabController(
-                      length: 3,
+                      length: 2,
                       child: Column(
                         children: <Widget>[
                           Container(
@@ -349,22 +366,22 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
                                         ),
                                       ),
                                     ),
-                                    Tab(
-                                      child: Container(
-                                        child: Align(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            "Saved (${c.allApplicants.value.data != null ? c.allApplicants.value.data!.length : 0})",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: tabIndex == 1
-                                                    ? Color(0xff983701)
-                                                    : Color(0xff555555),
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    // Tab(
+                                    //   child: Container(
+                                    //     child: Align(
+                                    //       alignment: Alignment.center,
+                                    //       child: Text(
+                                    //         "Saved (${c.allApplicants.value.data != null ? c.allApplicants.value.data!.length : 0})",
+                                    //         style: TextStyle(
+                                    //             fontSize: 14,
+                                    //             color: tabIndex == 1
+                                    //                 ? Color(0xff983701)
+                                    //                 : Color(0xff555555),
+                                    //             fontWeight: FontWeight.w400),
+                                    //       ),
+                                    //     ),
+                                    //   ),
+                                    // ),
                                     Tab(
                                       child: Container(
                                         child: Align(
@@ -390,8 +407,8 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
                             child: TabBarView(
                               physics: NeverScrollableScrollPhysics(),
                               children: [
-                                Applicants(c),
-                                Shortlisted(c),
+                                Applicants(c, changeTab: changeTab),
+                                // Shortlisted(c),
                                 ApprovedApplicants(c)
                               ],
                             ),
@@ -409,9 +426,10 @@ class ClientJobDetailsState extends State<ClientJobDetails> {
 class Applicants extends StatelessWidget {
   final _scrollController = ScrollController();
   final Controller c;
+  final dynamic? changeTab;
 
   // final List<ApplicantData> applicants;
-  Applicants(this.c);
+  Applicants(this.c, {this.changeTab});
   Widget build(BuildContext context) {
     return Obx(() {
       return SingleChildScrollView(
@@ -446,7 +464,8 @@ class Applicants extends StatelessWidget {
               : Column(
                   children: c.allApplicants.value.data != null
                       ? c.allApplicants.value.data!
-                          .map((ApplicantData e) => UserCard(applicant: e))
+                          .map((ApplicantData e) =>
+                              UserCard(applicant: e, changeTab: changeTab))
                           .toList()
                       : [Container()])
         ],
@@ -455,31 +474,31 @@ class Applicants extends StatelessWidget {
   }
 }
 
-class Shortlisted extends StatelessWidget {
-  final _scrollController = ScrollController();
-  final Controller c;
-  Shortlisted(this.c);
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 34,
-        ),
-        c.isFetchingApplicants.value
-            ? ShimmerList()
-            : Column(
-                children: c.allApplicants.value.data != null
-                    ? c.allApplicants.value.data!
-                        .map((ApplicantData e) =>
-                            SaveApplicantUserCard(applicant: e))
-                        .toList()
-                    : [Container()])
-      ],
-    ));
-  }
-}
+// class Shortlisted extends StatelessWidget {
+//   final _scrollController = ScrollController();
+//   final Controller c;
+//   Shortlisted(this.c);
+//   Widget build(BuildContext context) {
+//     return SingleChildScrollView(
+//         child: Column(
+//       crossAxisAlignment: CrossAxisAlignment.center,
+//       children: [
+//         SizedBox(
+//           height: 34,
+//         ),
+//         c.isFetchingApplicants.value
+//             ? ShimmerList()
+//             : Column(
+//                 children: c.allApplicants.value.data != null
+//                     ? c.allApplicants.value.data!
+//                         .map((ApplicantData e) =>
+//                             SaveApplicantUserCard(applicant: e))
+//                         .toList()
+//                     : [Container()])
+//       ],
+//     ));
+//   }
+// }
 
 class ApprovedApplicants extends StatelessWidget {
   final _scrollController = ScrollController();
@@ -510,10 +529,10 @@ class ApprovedApplicants extends StatelessWidget {
 class UserCard extends StatelessWidget {
   NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
   ApplicantData applicant;
-
+  dynamic? changeTab;
   JobService jobService = JobService();
   final CustomFlushBar customFlushBar = CustomFlushBar();
-  UserCard({required this.applicant});
+  UserCard({required this.applicant, this.changeTab});
 
   shortList(context) async {
     try {
@@ -535,12 +554,13 @@ class UserCard extends StatelessWidget {
     try {
       await jobService.approveShortlistApplicant(
           id: applicant.job, applicantId: applicant.user!.id);
-      Navigator.pop(context);
+      changeTab();
       customFlushBar.showSuccessFlushBar(
           title: 'Approved',
           body: 'You have successfully approved this applicant',
           context: context);
       await jobService.fetchApprovedApplicants(applicant.job);
+      await jobService.fetchApplicants(applicant.job);
     } catch (e) {
       customFlushBar.showErrorFlushBar(
           title: 'Error occured', body: '$e', context: context);
@@ -586,21 +606,27 @@ class UserCard extends StatelessWidget {
                         ],
                       ),
                       trailing: IconButton(
-                          onPressed: () => shortList(context),
+                          onPressed: () => null,
+                          // shortList(context),
                           icon: Icon(Icons.favorite_border_outlined, size: 15)),
                     )),
                 SizedBox(height: 14),
-                Container(
-                    color: Color(0xffFF8E08).withOpacity(0.05),
-                    padding: EdgeInsets.symmetric(horizontal: 17, vertical: 6),
-                    child: Text('${applicant.message}',
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Color(0xff272727),
-                          fontWeight: FontWeight.w400,
-                        ))),
+                applicant.message == null ||
+                        applicant.message == '' ||
+                        applicant.message!.trim().length == 0
+                    ? SizedBox.shrink()
+                    : Container(
+                        // color: Color(0xffFF8E08).withOpacity(0.05),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 17, vertical: 6),
+                        child: Text('${applicant.message}',
+                            // maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xff272727),
+                              fontWeight: FontWeight.w400,
+                            ))),
                 SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -628,7 +654,7 @@ class UserCard extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    ChatRoom('2', 'General', '3433r3r3'),
+                                    ChatRoom(user: applicant.user as UserModel),
                               ));
                         },
                       ),
@@ -909,25 +935,6 @@ class ApprovedApplicantUserCard extends StatelessWidget {
                 ),
               ],
             )));
-  }
-}
-
-class SabiBadges extends StatelessWidget {
-  final Color color;
-  final String title;
-
-  SabiBadges({required this.color, required this.title});
-
-  Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        decoration: BoxDecoration(
-          color: color,
-        ),
-        child: Text(
-          '$title',
-          style: TextStyle(fontSize: 8),
-        ));
   }
 }
 

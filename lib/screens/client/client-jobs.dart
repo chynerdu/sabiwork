@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
+import 'package:focused_menu/focused_menu.dart';
+import 'package:focused_menu/modals.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
@@ -9,7 +11,9 @@ import 'package:sabiwork/common/ratingBar.dart';
 import 'package:sabiwork/common/shimmerList.dart';
 import 'package:sabiwork/common/stacked_image.dart';
 import 'package:sabiwork/components/SWbutton.dart';
+import 'package:sabiwork/components/sabiBadges.dart';
 import 'package:sabiwork/helpers/customColors.dart';
+import 'package:sabiwork/helpers/flushBar.dart';
 import 'package:sabiwork/models/allJobsModel.dart';
 import 'package:sabiwork/models/myJobsModel.dart';
 import 'package:sabiwork/screens/client/add-job.dart';
@@ -57,14 +61,14 @@ class ClientJobScreenState extends State<ClientJobScreen> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: CustomColors.PrimaryColor,
-          onPressed: () {
-            Get.to(AddJob());
-          },
-          icon: Icon(Icons.add),
-          label: Text('New Job'),
-        ),
+        // floatingActionButton: FloatingActionButton.extended(
+        //   backgroundColor: CustomColors.PrimaryColor,
+        //   onPressed: () {
+        //     Get.to(AddJob());
+        //   },
+        //   icon: Icon(Icons.add),
+        //   label: Text('New Job'),
+        // ),
 
         // appBar: AppBar(
         //   leading: Container(
@@ -139,7 +143,7 @@ class ClientJobScreenState extends State<ClientJobScreen> {
                                               color: tabIndex == 0
                                                   ? Color(0xff983701)
                                                   : Color(0xff555555),
-                                              fontWeight: FontWeight.w400),
+                                              fontWeight: FontWeight.w500),
                                         ),
                                       ),
                                     ),
@@ -155,7 +159,7 @@ class ClientJobScreenState extends State<ClientJobScreen> {
                                               color: tabIndex == 1
                                                   ? Color(0xff983701)
                                                   : Color(0xff555555),
-                                              fontWeight: FontWeight.w400),
+                                              fontWeight: FontWeight.w500),
                                         ),
                                       ),
                                     ),
@@ -171,7 +175,7 @@ class ClientJobScreenState extends State<ClientJobScreen> {
                                               color: tabIndex == 2
                                                   ? Color(0xff983701)
                                                   : Color(0xff555555),
-                                              fontWeight: FontWeight.w400),
+                                              fontWeight: FontWeight.w500),
                                         ),
                                       ),
                                     ),
@@ -184,7 +188,7 @@ class ClientJobScreenState extends State<ClientJobScreen> {
                         Expanded(
                           child: TabBarView(
                             physics: NeverScrollableScrollPhysics(),
-                            children: [AllJobs(c), SavedJobs(c), SavedJobs(c)],
+                            children: [AllJobs(c), OpenJobs(c), ClosedJobs(c)],
                           ),
                         ),
                       ],
@@ -204,7 +208,9 @@ class AllJobs extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(onRefresh: () async {
       print('refreshing');
-      await jobService.fetchMyJobs();
+      jobService.fetchMyJobs();
+      jobService.fetchMyOpenJobs();
+      jobService.fetchMyClosedJobs();
     }, child: Obx(() {
       // print('my jobs ${c.myJobs.value.data!.length}');
       return SingleChildScrollView(
@@ -235,7 +241,7 @@ class AllJobs extends StatelessWidget {
                           prefixIcon: Icon(Icons.search),
                           labelText: 'Search'))),
               SizedBox(height: 37),
-              c.isFetchingJobs.value
+              c.isFetchingJobs.value && c.myJobs.value.data == null
                   ? ShimmerList()
                   : Column(
                       children: c.myJobs.value.data != null
@@ -249,10 +255,10 @@ class AllJobs extends StatelessWidget {
   }
 }
 
-class SavedJobs extends StatelessWidget {
+class OpenJobs extends StatelessWidget {
   final _scrollController = ScrollController();
   final Controller c;
-  SavedJobs(this.c);
+  OpenJobs(this.c);
   Widget build(BuildContext context) {
     return SingleChildScrollView(
         child: Column(
@@ -281,12 +287,59 @@ class SavedJobs extends StatelessWidget {
                     prefixIcon: Icon(Icons.search),
                     labelText: 'Search'))),
         SizedBox(height: 37),
-        c.isFetchingJobs.value
+        c.isFetchingJobs.value && c.myOpenJobs.value.data == null
             ? ShimmerList()
-            : Column(
-                children: c.myJobs.value.data!
-                    .map((MyJobData e) => JobCard(job: e))
-                    .toList())
+            : c.myOpenJobs.value.data == null
+                ? Center(child: Text('You have no open jobs'))
+                : Column(
+                    children: c.myOpenJobs.value.data!
+                        .map((MyJobData e) => JobCard(job: e))
+                        .toList())
+      ],
+    ));
+  }
+}
+
+class ClosedJobs extends StatelessWidget {
+  final _scrollController = ScrollController();
+  final Controller c;
+  ClosedJobs(this.c);
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+        child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          height: 34,
+        ),
+        SizedBox(
+            height: 40,
+            width: MediaQuery.of(context).size.width * 0.75,
+            child: TextFormField(
+                decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide:
+                          BorderSide(width: 0.5, color: Color(0xffAEAEAE)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide:
+                          BorderSide(width: 0.5, color: Color(0xffAEAEAE)),
+                    ),
+                    prefixIcon: Icon(Icons.search),
+                    labelText: 'Search'))),
+        SizedBox(height: 37),
+        c.isFetchingJobs.value && c.myClosedJobs.value.data == null
+            ? ShimmerList()
+            : c.myClosedJobs.value.data == null
+                ? Center(child: Text('You have not closed any jobs'))
+                : Column(
+                    children: c.myClosedJobs.value.data!
+                        .map((MyJobData e) => JobCard(job: e))
+                        .toList())
       ],
     ));
   }
@@ -294,14 +347,92 @@ class SavedJobs extends StatelessWidget {
 
 class JobCard extends StatelessWidget {
   NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
+  final JobService jobService = JobService();
+  final CustomFlushBar customFlushBar = CustomFlushBar();
   MyJobData job;
   JobCard({required this.job});
+
+  submit(context, status) async {
+    try {
+      var payload = {"jobStatus": status};
+
+      final result = await jobService.updateMyJob(job.sId, payload);
+      print('result $result');
+
+      // Navigator.pop(context);
+      status == "Closed"
+          ? customFlushBar.showSuccessFlushBar(
+              title: 'Job has been closed',
+              body: 'You have closed this job',
+              context: context)
+          : status == "Suspended"
+              ? customFlushBar.showSuccessFlushBar(
+                  title: 'Job has been suspended',
+                  body: 'You have suspended this job',
+                  context: context)
+              : customFlushBar.showSuccessFlushBar(
+                  title: 'Job has been re-opened',
+                  body: 'You have re-opened this job',
+                  context: context);
+
+      // Future.delayed(
+      //     const Duration(milliseconds: 500), () => Navigator.pop(context));
+    } catch (e) {
+      // show flushbar
+      customFlushBar.showErrorFlushBar(
+          title: 'Error occured', body: '$e', context: context);
+    }
+  }
+
   Widget build(BuildContext context) {
-    return InkWell(
-        onTap: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(builder: (_) => JobDetailsState)))
+    return FocusedMenuHolder(
+        menuWidth: MediaQuery.of(context).size.width * 0.50,
+        blurSize: 5.0,
+        menuItemExtent: 45,
+        menuBoxDecoration: BoxDecoration(
+            color: Colors.grey,
+            borderRadius: BorderRadius.all(Radius.circular(15.0))),
+        duration: Duration(milliseconds: 100),
+        animateMenuItems: true,
+        blurBackgroundColor: Colors.black54,
+        openWithTap: false, // Open Focused-Menu on Tap rather than Long Press
+        menuOffset:
+            10.0, // Offset value to show menuItem from the selected item
+        bottomOffsetHeight:
+            80.0, // Offset height to consider, for showing the menu item ( for example bottom navigation bar), so that the popup menu will be shown on top of selected item.
+        menuItems: <FocusedMenuItem>[
+          // Add Each FocusedMenuItem  for Menu Options
+          FocusedMenuItem(
+              title: Text("View job"),
+              trailingIcon: Icon(Icons.open_in_new),
+              onPressed: () {
+                Get.to(ClientJobDetails(job: job));
+              }),
+          // FocusedMenuItem(
+          //     title: Text("Share"),
+          //     trailingIcon: Icon(Icons.share),
+          //     onPressed: () {}),
+          FocusedMenuItem(
+              title: Text(
+                job.jobStatus == "Open" ? 'Close' : 'Re-open Job',
+              ),
+              trailingIcon: Icon(Icons.settings),
+              onPressed: () {
+                submit(context, job.jobStatus == "Open" ? 'Closed' : 'Open');
+              }),
+          if (job.jobStatus != 'Suspended')
+            FocusedMenuItem(
+                title: Text(
+                  "Suspend Job",
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+                trailingIcon:
+                    Icon(Icons.pause, color: Color.fromARGB(255, 207, 132, 11)),
+                onPressed: () {
+                  submit(context, 'Suspended');
+                }),
+        ],
+        onPressed: () {
           Get.to(ClientJobDetails(job: job));
         },
         child: Container(
@@ -339,12 +470,25 @@ class JobCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('Job open',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Color(0xff209B25),
-                              fontWeight: FontWeight.w400,
-                            )),
+                        Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: job.jobStatus == 'Open'
+                                  ? Color(0xff209B25)
+                                  : job.jobStatus == 'Suspended'
+                                      ? Color.fromARGB(255, 207, 132, 11)
+                                      : Color.fromARGB(255, 201, 20, 20),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text('${job.jobStatus}',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  letterSpacing: .5,
+                                  fontWeight: FontWeight.w500,
+                                ))),
+                        SizedBox(height: 4),
                         Text('₦${_format.format(job.pricePerWorker)}',
                             style: TextStyle(
                               fontSize: 14,

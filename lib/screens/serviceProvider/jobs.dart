@@ -142,7 +142,7 @@ class JobScreenState extends State<JobScreen> {
                                       child: Align(
                                         alignment: Alignment.center,
                                         child: Text(
-                                          "Saved",
+                                          "Applied",
                                           style: TextStyle(
                                               fontSize: 14,
                                               color: tabIndex == 1
@@ -161,7 +161,7 @@ class JobScreenState extends State<JobScreen> {
                         Expanded(
                           child: TabBarView(
                             physics: NeverScrollableScrollPhysics(),
-                            children: [AllJobs(c), SavedJobs(c)],
+                            children: [AllJobs(c), AppliedJobs(c)],
                           ),
                         ),
                       ],
@@ -216,10 +216,10 @@ class AllJobs extends StatelessWidget {
   }
 }
 
-class SavedJobs extends StatelessWidget {
+class AppliedJobs extends StatelessWidget {
   final _scrollController = ScrollController();
   final Controller c;
-  SavedJobs(this.c);
+  AppliedJobs(this.c);
   Widget build(BuildContext context) {
     return SingleChildScrollView(
         child: Column(
@@ -248,11 +248,11 @@ class SavedJobs extends StatelessWidget {
                     prefixIcon: Icon(Icons.search),
                     labelText: 'Search'))),
         SizedBox(height: 37),
-        c.isFetchingJobs.value
+        c.isFetchingMyJobs.value
             ? ShimmerList()
             : Column(
-                children: c.allJobs.value.data!
-                    .map((Data e) => JobCard(job: e))
+                children: c.myAppliedJobs.value.result!.data!
+                    .map((dynamic e) => JobCard(job: e.job))
                     .toList())
       ],
     ));
