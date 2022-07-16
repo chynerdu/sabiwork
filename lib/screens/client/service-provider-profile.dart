@@ -20,7 +20,7 @@ import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/job_service.dart';
 
 class ServiceproviderProfile extends StatefulWidget {
-  ApplicantData? applicants;
+  UserModel? applicants;
   ServiceproviderProfile({this.applicants});
   @override
   State<StatefulWidget> createState() {
@@ -40,26 +40,34 @@ class ServiceproviderProfileState extends State<ServiceproviderProfile> {
   Controller c = Get.put(Controller());
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  submit(context) async {
-    try {
-      if (!_formKey.currentState!.validate()) {
-        return;
-      }
-      _formKey.currentState!.save();
-      final result =
-          await jobService.applyForJob(applyJobModel, widget.applicants!.sId);
-      print('result $result');
-      Navigator.pop(context);
-      customFlushBar.showSuccessFlushBar(
-          title: 'Application sent',
-          body: 'You have successfully applied for this job',
-          context: context);
-    } catch (e) {
-      // show flushbar
-      customFlushBar.showErrorFlushBar(
-          title: 'Error occured', body: '$e', context: context);
-    }
+  initState() {
+    fetchJobs();
   }
+
+  fetchJobs() async {
+    await jobService.fetchAllJobs();
+  }
+
+  // submit(context) async {
+  //   try {
+  //     if (!_formKey.currentState!.validate()) {
+  //       return;
+  //     }
+  //     _formKey.currentState!.save();
+  //     final result =
+  //         await jobService.applyForJob(applyJobModel, widget.applicants!.sId);
+  //     print('result $result');
+  //     Navigator.pop(context);
+  //     customFlushBar.showSuccessFlushBar(
+  //         title: 'Application sent',
+  //         body: 'You have successfully applied for this job',
+  //         context: context);
+  //   } catch (e) {
+  //     // show flushbar
+  //     customFlushBar.showErrorFlushBar(
+  //         title: 'Error occured', body: '$e', context: context);
+  //   }
+  // }
 
   Widget build(BuildContext context) {
     ServiceproviderProfileController clientC =
@@ -80,10 +88,10 @@ class ServiceproviderProfileState extends State<ServiceproviderProfile> {
                 // top
                 Column(
                   children: [
-                    UsersProfileImageSAvatarx2(user: widget.applicants!.user),
+                    UsersProfileImageSAvatarx2(user: widget.applicants),
                     SizedBox(height: 20),
                     Text(
-                        '${widget.applicants!.user!.firstName} ${widget.applicants!.user!.lastName}',
+                        '${widget.applicants!.firstName} ${widget.applicants!.lastName}',
                         style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w500,
@@ -99,7 +107,7 @@ class ServiceproviderProfileState extends State<ServiceproviderProfile> {
                         Icon(Icons.location_pin, size: 8),
                         SizedBox(width: 3),
                         Text(
-                            '${widget.applicants!.user!.lga ?? 'Not specified'}, ${widget.applicants!.user!.state ?? ''}',
+                            '${widget.applicants!.lga ?? 'Not specified'}, ${widget.applicants!.state ?? ''}',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -151,7 +159,7 @@ class ServiceproviderProfileState extends State<ServiceproviderProfile> {
                 if (clientC.showReview == true)
                   Container(
                       padding: EdgeInsets.only(bottom: 17),
-                      child: Text('${widget.applicants!.user!.address}',
+                      child: Text('${widget.applicants!.address}',
                           style: TextStyle(
                             fontSize: 13,
                             color: Color(0xff888888),
@@ -174,6 +182,7 @@ class ReviewList extends StatelessWidget {
   final Controller c;
   ReviewList(this.c);
   Widget build(BuildContext context) {
+    print('job ${c.allJobs.value.data}');
     return Obx(() {
       return SingleChildScrollView(
           child: Column(
@@ -217,68 +226,71 @@ class ReviewList extends StatelessWidget {
           //             prefixIcon: Icon(Icons.search),
           //             label: Text('Search')))),
           // SizedBox(height: 37),
-          if (clientC.showReview == true)
-            c.isFetchingJobs.value
-                ? ShimmerList()
-                : Column(
-                    children: c.allJobs.value.data!
-                        .map((Data e) => ReviewCard(job: e))
-                        .toList())
+          // TODO Add review
+          // Review ///////////////////////
+
+          // if (clientC.showReview == true && c.allJobs.value.data != null)
+          //   c.isFetchingJobs.value
+          //       ? ShimmerList()
+          //       : Column(
+          //           children: c.allJobs.value.data!
+          //               .map((Data e) => ReviewCard(job: e))
+          //               .toList())
         ],
       ));
     });
   }
 }
 
-class ReviewCard extends StatelessWidget {
-  NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
-  Data job;
-  ReviewCard({required this.job});
-  Widget build(BuildContext context) {
-    return InkWell(
-        onTap: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(builder: (_) => JobDetailsState)))
-          // Get.to ServiceproviderProfile(job: job));
-        },
-        child: Container(
-            margin: EdgeInsets.only(bottom: 16),
-            padding: EdgeInsets.fromLTRB(14, 0, 14, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ListTile(
-                    contentPadding: EdgeInsets.only(left: 0),
-                    leading: UsersProfileImageSAvatar(user: job.user),
-                    title: Text('${job.user!.firstName} ${job.user!.lastName}',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 13)),
-                    subtitle: Row(children: [
-                      RatingBarComponent(initialRating: 3.5),
-                      Text('(136 reviews)', style: TextStyle(fontSize: 7)),
-                    ])),
+// class ReviewCard extends StatelessWidget {
+//   NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
+//   Data job;
+//   ReviewCard({required this.job});
+//   Widget build(BuildContext context) {
+//     return InkWell(
+//         onTap: () {
+//           // Navigator.push(
+//           //   context,
+//           //   MaterialPageRoute(builder: (_) => JobDetailsState)))
+//           // Get.to ServiceproviderProfile(job: job));
+//         },
+//         child: Container(
+//             margin: EdgeInsets.only(bottom: 16),
+//             padding: EdgeInsets.fromLTRB(14, 0, 14, 0),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 ListTile(
+//                     contentPadding: EdgeInsets.only(left: 0),
+//                     leading: UsersProfileImageSAvatar(user: job.user),
+//                     title: Text('${job.firstName} ${job.lastName}',
+//                         style: TextStyle(
+//                             color: Colors.black,
+//                             fontWeight: FontWeight.w500,
+//                             fontSize: 13)),
+//                     subtitle: Row(children: [
+//                       RatingBarComponent(initialRating: 3.5),
+//                       Text('(136 reviews)', style: TextStyle(fontSize: 7)),
+//                     ])),
 
-                SizedBox(height: 10),
-                Container(
-                    color: Color(0xffFF8E08).withOpacity(0.05),
-                    padding: EdgeInsets.symmetric(horizontal: 17, vertical: 6),
-                    child: Text(
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisi lectus diam, amet, ullamcorper egestas iaculis. Id neque, morbi sit ultrices imperdiet diam malesuada nulla. Pellentesque facilisis congue ac ligula faucibus amet viverra.',
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Color(0xff272727),
-                          fontWeight: FontWeight.w400,
-                        ))),
-                // SizedBox(height: 14),
-              ],
-            )));
-  }
-}
+//                 SizedBox(height: 10),
+//                 Container(
+//                     color: Color(0xffFF8E08).withOpacity(0.05),
+//                     padding: EdgeInsets.symmetric(horizontal: 17, vertical: 6),
+//                     child: Text(
+//                         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nisi lectus diam, amet, ullamcorper egestas iaculis. Id neque, morbi sit ultrices imperdiet diam malesuada nulla. Pellentesque facilisis congue ac ligula faucibus amet viverra.',
+//                         maxLines: 4,
+//                         overflow: TextOverflow.ellipsis,
+//                         style: TextStyle(
+//                           fontSize: 10,
+//                           color: Color(0xff272727),
+//                           fontWeight: FontWeight.w400,
+//                         ))),
+//                 // SizedBox(height: 14),
+//               ],
+//             )));
+//   }
+// }
 
 class ServiceproviderProfileController extends GetxController {
   RxBool showReview = true.obs;

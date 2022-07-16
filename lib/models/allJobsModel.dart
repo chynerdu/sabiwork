@@ -1,3 +1,4 @@
+import 'package:sabiwork/models/applicantsModel.dart';
 import 'package:sabiwork/models/userModel.dart';
 
 class AllJobsModel {
@@ -30,7 +31,7 @@ class Data {
   List<String>? shortlistedApplicants;
   String? sId;
   List<String>? jobImages;
-
+  String? jobStatus;
   String? description;
   String? additionalDetails;
   dynamic numberOfWorkers;
@@ -39,6 +40,7 @@ class Data {
   String? state;
   String? lga;
   String? address;
+  ApplicantModel? jobApplicants;
 
   String? createdAt;
   int? iV;
@@ -48,6 +50,7 @@ class Data {
       this.applicantCount,
       this.shortlistedApplicants,
       this.sId,
+      this.jobStatus,
       this.jobImages,
       this.description,
       this.additionalDetails,
@@ -56,20 +59,27 @@ class Data {
       this.state,
       this.lga,
       this.address,
+      this.jobApplicants,
       this.user,
       this.createdAt,
       this.iV});
 
   Data.fromJson(Map<String, dynamic> json) {
     jobType = json['job_type'] ?? '-';
-    jobImages = json['job_images'].cast<String>();
-
+    jobImages =
+        json['job_images'] != null ? json['job_images'].cast<String>() : [];
+    jobStatus = json['jobStatus'];
     applicantCount = json['applicant_count'];
-    shortlistedApplicants = json['shortlistedApplicants'].cast<String>();
+    shortlistedApplicants = json['shortlistedApplicants'] != null
+        ? json['shortlistedApplicants'].cast<String>()
+        : [];
     sId = json['_id'];
     lga = json['lga'] == 'null' ? 'Not specified' : json['lga'];
     state = json['state'] ?? '';
     address = json['address'];
+    jobApplicants = json['jobApplicants'] != null
+        ? new ApplicantModel.fromJson(json['jobApplicants'])
+        : null;
     description = json['description'] ?? '-';
     additionalDetails = json['additionalDetails'] ?? 'No additional details';
     numberOfWorkers = int.tryParse(json['number_of_workers']) ?? 0;
@@ -83,7 +93,7 @@ class Data {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['job_type'] = this.jobType;
     data['job_images'] = this.jobImages;
-
+    data['jobStatus'] = this.jobStatus;
     data['applicant_count'] = this.applicantCount;
     data['shortlistedApplicants'] = this.shortlistedApplicants;
     data['_id'] = this.sId;
@@ -92,6 +102,9 @@ class Data {
     data['address'] = this.address;
     data['description'] = this.description;
     data['additionalDetails'] = this.additionalDetails;
+    if (this.jobApplicants != null) {
+      data['jobApplicants'] = this.jobApplicants!.toJson();
+    }
 
     data['number_of_workers'] = this.numberOfWorkers;
     data['price_per_worker'] = this.pricePerWorker;
@@ -103,6 +116,43 @@ class Data {
     return data;
   }
 }
+
+class ApplicantModel {
+  String? sId;
+  String? job;
+
+  String? user;
+  String? message;
+  String? createdAt;
+  int? iV;
+
+  ApplicantModel(
+      {this.sId, this.job, this.user, this.message, this.createdAt, this.iV});
+
+  ApplicantModel.fromJson(Map<String, dynamic> json) {
+    sId = json['_id'];
+    job = json['job'];
+
+    user = json['user'];
+    message =
+        json['message'] != null ? json['message'] : 'No additional information';
+    createdAt = json['createdAt'];
+    iV = json['__v'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['_id'] = this.sId;
+    data['job'] = this.job;
+
+    data['user'] = this.user;
+    data['message'] = this.message;
+    data['createdAt'] = this.createdAt;
+    data['__v'] = this.iV;
+    return data;
+  }
+}
+
 
 // class User {
 //   String? role;

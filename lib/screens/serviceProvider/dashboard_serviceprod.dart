@@ -13,6 +13,8 @@ import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/common/shimmerList.dart';
 import 'package:sabiwork/common/stacked_image.dart';
 import 'package:sabiwork/components/SWbutton.dart';
+import 'package:sabiwork/components/sabiBadges.dart';
+import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/helpers/dialogs.dart';
 import 'package:sabiwork/helpers/flushBar.dart';
 import 'package:sabiwork/models/allJobsModel.dart';
@@ -134,8 +136,9 @@ class RecommendedJobs extends StatelessWidget {
     // _scrollController.addListener(toggleShowHeader());
 
     return RefreshIndicator(onRefresh: () async {
-      await jobService.fetchAllJobs();
-      await jobService.fetchApprovedJobs();
+      jobService.fetchAllJobs();
+      jobService.fetchApprovedJobs();
+      jobService.fetchAppliedJobs();
     }, child: Obx(() {
       return
           //  NotificationListener<ScrollNotification>(
@@ -329,12 +332,15 @@ class RecommendedJobs extends StatelessWidget {
                                     fontSize: 14)))
                       ]),
                   SizedBox(height: 16),
-                  c.isFetchingJobs.value && c.allJobs.value.data == null
-                      ? ShimmerList()
-                      : Column(
-                          children: c.allJobs.value.data!
-                              .map((Data e) => JobCard(job: e))
-                              .toList())
+                  c.allJobs.value.data == null
+                      ? SizedBox.shrink()
+                      : c.isFetchingJobs.value &&
+                              c.allJobs.value.data!.length == 0
+                          ? ShimmerList()
+                          : Column(
+                              children: c.allJobs.value.data!
+                                  .map((Data e) => JobCard(job: e))
+                                  .toList())
 
                   // SizedBox(height: 20),
                   // JobCard(),
@@ -352,6 +358,7 @@ class JobCard extends StatelessWidget {
   Data job;
   JobCard({required this.job});
   Widget build(BuildContext context) {
+    Controller c = Get.put(Controller());
     return InkWell(
         onTap: () {
           // Navigator.push(
@@ -370,12 +377,23 @@ class JobCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SabiBadges(
-                        title: '${job.numberOfWorkers} Person(s)',
-                        color: Color(0xffe6e6e6)),
-                    SabiBadges(
-                        title: '${job.jobType}', color: Color(0xfff8dfdb))
+                    Row(
+                      children: [
+                        SabiBadges(
+                            title: '${job.numberOfWorkers} Person(s)',
+                            color: Color(0xffe6e6e6)),
+                        SabiBadges(
+                            title: '${job.jobType}', color: Color(0xfff8dfdb))
+                      ],
+                    ),
+                    if (job.jobApplicants != null)
+                      if (job.jobApplicants!.user != c.userData.value.id)
+                        SabiBadges(
+                            title: 'Already applied',
+                            titleColor: Colors.white,
+                            color: CustomColors.Green),
                   ],
                 ),
                 SizedBox(height: 9),
@@ -510,6 +528,7 @@ class ApprovedJobCard extends StatelessWidget {
       await jobService.startJob(
         approvedJobId: approvedJob.sId,
       );
+      await jobService.fetchApprovedJobs();
 
       customDialogs.successDialog(
           context: context,
@@ -532,6 +551,7 @@ class ApprovedJobCard extends StatelessWidget {
       await jobService.endJob(
         approvedJobId: approvedJob.sId,
       );
+      await jobService.fetchApprovedJobs();
 
       customDialogs.successDialog(
           context: context,

@@ -582,8 +582,8 @@ class UserCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                    onTap: () =>
-                        Get.to(ServiceproviderProfile(applicants: applicant)),
+                    onTap: () => Get.to(
+                        ServiceproviderProfile(applicants: applicant.user)),
                     child: ListTile(
                       contentPadding: EdgeInsets.only(left: 0),
                       leading: UsersProfileImageSAvatar(user: applicant.user),
@@ -712,8 +712,8 @@ class SaveApplicantUserCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                    onTap: () =>
-                        Get.to(ServiceproviderProfile(applicants: applicant)),
+                    onTap: () => Get.to(
+                        ServiceproviderProfile(applicants: applicant.user)),
                     child: ListTile(
                       contentPadding: EdgeInsets.only(left: 0),
                       leading: UsersProfileImageSAvatar(user: applicant.user),
@@ -850,91 +850,103 @@ class ApprovedApplicantUserCard extends StatelessWidget {
         },
       );
     else
-      return Container();
+      return SWSuttonSmallDisbaled(
+        title: 'No action required',
+        onPressed: () {
+          null;
+          // approve(context);
+        },
+      );
+    ;
   }
 
   Widget build(BuildContext context) {
-    return InkWell(
-        onTap: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(builder: (_) => JobDetailsState)))
-        },
-        child: Container(
-            margin: EdgeInsets.only(bottom: 16),
-            padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                    onTap: () =>
-                        Get.to(ServiceproviderProfile(applicants: applicant)),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.only(left: 0),
-                      leading: UsersProfileImageSAvatar(user: applicant.user),
-                      title: Text(
-                          '${applicant.user!.firstName} ${applicant.user!.lastName}',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 13)),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('has completed 10 jobs',
-                              style: TextStyle(fontSize: 10)),
-                          Row(children: [
-                            RatingBarComponent(initialRating: 3.5),
-                            Text('(136 reviews)',
-                                style: TextStyle(fontSize: 7)),
-                          ])
-                        ],
-                      ),
-                      trailing:
-                          Text('${applicant.jobApplicantStatus!.toUpperCase()}',
+    print('applicants ${applicant.user}');
+    return applicant.user == null
+        ? SizedBox.shrink()
+        : InkWell(
+            onTap: () {
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (_) => JobDetailsState)))
+            },
+            child: Container(
+                margin: EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                        onTap: () => Get.to(
+                            ServiceproviderProfile(applicants: applicant.user)),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.only(left: 0),
+                          leading:
+                              UsersProfileImageSAvatar(user: applicant.user),
+                          title: Text(
+                              '${applicant.user!.firstName} ${applicant.user!.lastName}',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('has completed 10 jobs',
+                                  style: TextStyle(fontSize: 10)),
+                              Row(children: [
+                                RatingBarComponent(initialRating: 3.5),
+                                Text('(136 reviews)',
+                                    style: TextStyle(fontSize: 7)),
+                              ])
+                            ],
+                          ),
+                          trailing: Text(
+                              '${applicant.jobApplicantStatus!.toUpperCase()}',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.green,
                                 fontFamily: "Roboto",
                                 fontWeight: FontWeight.w800,
                               )),
-                    )),
-                SizedBox(height: 14),
-                Container(
-                    color: Color(0xffFF8E08).withOpacity(0.05),
-                    padding: EdgeInsets.symmetric(horizontal: 17, vertical: 6),
-                    child: Text('${applicant.message}',
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Color(0xff272727),
-                          fontWeight: FontWeight.w400,
-                        ))),
-                SizedBox(height: 14),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                        height: 34,
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: handleButton(
-                            applicant.jobApplicantStatus, context)),
-                    SizedBox(width: 17),
-                    // SizedBox(
-                    //   height: 34,
-                    //   width: MediaQuery.of(context).size.width * 0.3 - 22,
-                    //   child: SWBorderedButtonWithIcon(
-                    //     icon: Icon(Icons.close,
-                    //         color: Color(0xffBD4300), size: 13),
-                    //     title: 'Decline',
-                    //     onPressed: () {},
-                    //   ),
-                    // ),
+                        )),
+                    SizedBox(height: 14),
+                    Container(
+                        color: Color(0xffFF8E08).withOpacity(0.05),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 17, vertical: 6),
+                        child: Text('${applicant.message}',
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xff272727),
+                              fontWeight: FontWeight.w400,
+                            ))),
+                    SizedBox(height: 14),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                            height: 34,
+                            width: MediaQuery.of(context).size.width * 0.5,
+                            child: handleButton(
+                                applicant.jobApplicantStatus, context)),
+                        SizedBox(width: 17),
+                        // SizedBox(
+                        //   height: 34,
+                        //   width: MediaQuery.of(context).size.width * 0.3 - 22,
+                        //   child: SWBorderedButtonWithIcon(
+                        //     icon: Icon(Icons.close,
+                        //         color: Color(0xffBD4300), size: 13),
+                        //     title: 'Decline',
+                        //     onPressed: () {},
+                        //   ),
+                        // ),
+                      ],
+                    ),
                   ],
-                ),
-              ],
-            )));
+                )));
   }
 }
 

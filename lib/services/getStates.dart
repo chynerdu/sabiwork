@@ -16,6 +16,8 @@ class Controller extends GetxController {
   // define loading state.
   final isLoading = false.obs;
 
+  final activeRecipient = ''.obs;
+
   final isFetchingJobs = false.obs;
 
   final isFetchingMyJobs = false.obs;
@@ -59,6 +61,10 @@ class Controller extends GetxController {
 
   void setAllMessages(state) {
     allMessages.value = state;
+  }
+
+  void setActiveRecipient(state) {
+    activeRecipient.value = state;
   }
 
   void setRecentChats(state) {

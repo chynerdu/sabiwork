@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:lottie/lottie.dart';
 import 'package:sabiwork/common/profileImage.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/models/messagesModel.dart';
 import 'package:sabiwork/models/userModel.dart';
+import 'package:sabiwork/screens/client/service-provider-profile.dart';
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/messages_service.dart';
 import 'package:sabiwork/services/socket_service.dart';
@@ -74,10 +76,9 @@ class ChatRoomState extends State<ChatRoom> {
 
   initState() {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
+      getMessages();
       socketConnection.startConnection();
     });
-
-    getMessages();
 
     super.initState();
   }
@@ -102,6 +103,7 @@ class ChatRoomState extends State<ChatRoom> {
   }
 
   getMessages() async {
+    print('fetching mesages');
     await messageService.fetchMessage(recipientId: widget.user.id);
   }
 
@@ -384,57 +386,94 @@ class ChatRoomState extends State<ChatRoom> {
             //         ),
             //       )
             //     :
-            c.allMessages.value.result == null
-                ? Center(
-                    child: Text(
-                        'You have not started a conversation with ${widget.user.firstName}'))
-                : ListView.builder(
-                    controller: _chatScrollController,
-                    reverse: true,
-                    shrinkWrap: true,
-                    // itemCount: 4,
-                    itemCount: c.allMessages.value.result!.data!.length,
-                    // messages.length,
-                    itemBuilder: (context, index) {
-                      Data message = c.allMessages.value.result!.data![index];
-                      print('message $message');
-                      // print('projects $project');
-                      // if (project.id != 1) {
-                      return Container(
-                        padding: EdgeInsets.only(bottom: 10),
-                        child: message.senderId == c.userData.value.id
-                            ? Container(
-                                padding: EdgeInsets.only(bottom: 0, right: 15),
-                                child: Align(
-                                    alignment: Alignment(0.9, -0.9),
-                                    child: buildSenderConversationBody(
-                                      message.message,
-                                      Jiffy(message.createdAt ?? DateTime.now())
-                                          .fromNow(),
-                                    )))
-                            : Container(
-                                padding: EdgeInsets.only(bottom: 0, left: 15),
-                                child: Align(
-                                    alignment: Alignment.topLeft,
-                                    child: buildReceiverConversationBody(
-                                        message.message,
-                                        "${widget.user.firstName}",
-                                        Jiffy(message.createdAt ??
-                                                DateTime.now())
-                                            .fromNow()))),
-                      );
-                      // } else {
-                      //   return Container(
-                      //     padding: EdgeInsets.only(bottom: 40),
-                      //     child: Align(
-                      //       alignment: Alignment.topLeft,
-                      //       child: buildReceiverConversationBody('${project.body}')
-                      //     )
-                      //   );
-                      // }
-                      // return MemberItem(project, index, model);
-                    },
-                  )));
+            c.isFetchingMessage.value && c.allMessages.value.result == null
+                ? Center(child: CircularProgressIndicator())
+                : c.allMessages.value.result == null
+                    ? Center(
+                        child: Container(
+                            width: MediaQuery.of(context).size.width * 0.7,
+                            child: Text(
+                                'Pulling your conversations. A moment please😀',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff333333),
+                                    fontSize: 17))),
+                      )
+                    : c.allMessages.value.result!.data!.length == 0
+                        ? Center(
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Lottie.asset('assets/images/no-message.json',
+                                      fit: BoxFit.fill,
+                                      width: 150,
+                                      height: 150),
+                                  Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.7,
+                                      child: Text(
+                                          'You have not started any chat with ${widget.user.firstName}. Say hello',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xff333333),
+                                              fontSize: 17))),
+                                  SizedBox(height: 10),
+                                ]),
+                          )
+                        : ListView.builder(
+                            controller: _chatScrollController,
+                            reverse: true,
+                            shrinkWrap: true,
+                            // itemCount: 4,
+                            itemCount: c.allMessages.value.result!.data!.length,
+                            // messages.length,
+                            itemBuilder: (context, index) {
+                              Data message =
+                                  c.allMessages.value.result!.data![index];
+                              print('message $message');
+                              // print('projects $project');
+                              // if (project.id != 1) {
+                              return Container(
+                                padding: EdgeInsets.only(bottom: 10),
+                                child: message.senderId == c.userData.value.id
+                                    ? Container(
+                                        padding: EdgeInsets.only(
+                                            bottom: 0, right: 15),
+                                        child: Align(
+                                            alignment: Alignment(0.9, -0.9),
+                                            child: buildSenderConversationBody(
+                                              message.message,
+                                              Jiffy(message.createdAt ??
+                                                      DateTime.now())
+                                                  .fromNow(),
+                                            )))
+                                    : Container(
+                                        padding: EdgeInsets.only(
+                                            bottom: 0, left: 15),
+                                        child: Align(
+                                            alignment: Alignment.topLeft,
+                                            child:
+                                                buildReceiverConversationBody(
+                                                    message.message,
+                                                    "${widget.user.firstName}",
+                                                    Jiffy(message.createdAt ??
+                                                            DateTime.now())
+                                                        .fromNow()))),
+                              );
+                              // } else {
+                              //   return Container(
+                              //     padding: EdgeInsets.only(bottom: 40),
+                              //     child: Align(
+                              //       alignment: Alignment.topLeft,
+                              //       child: buildReceiverConversationBody('${project.body}')
+                              //     )
+                              //   );
+                              // }
+                              // return MemberItem(project, index, model);
+                            },
+                          )));
   }
 
   Widget buildSenderConversationBody(message, time) {
@@ -456,9 +495,9 @@ class ChatRoomState extends State<ChatRoom> {
                   child: Container(
                       decoration: BoxDecoration(
                         borderRadius: new BorderRadius.only(
-                            topLeft: const Radius.circular(25.0),
+                            topLeft: const Radius.circular(20.0),
                             topRight: const Radius.circular(25.0),
-                            bottomLeft: const Radius.circular(25.0)),
+                            bottomLeft: const Radius.circular(20.0)),
                         // gradient: LinearGradient(
                         //     begin: Alignment.centerLeft,
                         //     end: Alignment.centerRight,
@@ -507,8 +546,8 @@ class ChatRoomState extends State<ChatRoom> {
                   shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.only(
                         topLeft: const Radius.circular(25.0),
-                        topRight: const Radius.circular(25.0),
-                        bottomRight: const Radius.circular(25.0)),
+                        topRight: const Radius.circular(20.0),
+                        bottomRight: const Radius.circular(20.0)),
                   ),
                   borderOnForeground: true,
                   elevation: 0.5,
@@ -567,21 +606,29 @@ class ChatRoomState extends State<ChatRoom> {
                       leading: GestureDetector(
                           onTap: () => Navigator.pop(context),
                           child: Icon(Icons.arrow_back_ios, size: 18)),
-                      title: Container(
-                          child: Row(
-                        children: [
-                          SizedBox(
-                              width: 30,
-                              height: 30,
-                              child: UsersProfileImageSAvatarx2(
-                                  user: widget.user)),
-                          SizedBox(width: 10),
-                          Text(
-                              '${widget.user.firstName} ${widget.user.lastName}',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold))
-                        ],
-                      )),
+                      title: GestureDetector(
+                          onTap: () {
+                            widget.user.role == "service-provider"
+                                ? Get.to(ServiceproviderProfile(
+                                    applicants: widget.user))
+                                : null;
+                          },
+                          child: Container(
+                              child: Row(
+                            children: [
+                              SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: UsersProfileImageSAvatarx2(
+                                      user: widget.user)),
+                              SizedBox(width: 10),
+                              Text(
+                                  '${widget.user.firstName} ${widget.user.lastName}',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold))
+                            ],
+                          ))),
                       actions: [
                         GestureDetector(child: Icon(Icons.call, size: 20)),
                         SizedBox(width: 16),

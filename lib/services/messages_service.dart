@@ -12,27 +12,39 @@ class MessageService {
 
   Future fetchMessage({recipientId}) async {
     Controller c = Get.put(Controller());
-    c.updateFetchingMessageStatus(true);
-    print('receipient $recipientId');
-    final result =
-        await _service.getData(path: APIPath.allMessages(recipientId));
-    ChatMessagesModel decodedData = ChatMessagesModel.fromJson(result);
-    print('messages $decodedData');
-    c.setAllMessages(decodedData);
-    c.updateFetchingMessageStatus(false);
-    print('result : $result');
+    try {
+      c.setAllMessages(ChatMessagesModel());
+      c.updateFetchingMessageStatus(true);
+      print('receipient $recipientId');
+      final result =
+          await _service.getData(path: APIPath.allMessages(recipientId));
+      ChatMessagesModel decodedData = ChatMessagesModel.fromJson(result);
+      print('messages $decodedData');
+      c.setAllMessages(decodedData);
+      c.setActiveRecipient(recipientId);
+      c.updateFetchingMessageStatus(false);
+      print('result : $result');
 
-    return decodedData;
+      return decodedData;
+    } catch (e) {
+      c.updateFetchingMessageStatus(false);
+    }
   }
 
   Future fetchRecentChats() async {
     Controller c = Get.put(Controller());
-    final result = await _service.getData(path: APIPath.recentChats());
-    RecentChatModel decodedData = RecentChatModel.fromJson(result);
-    print('messages $decodedData');
-    c.setRecentChats(decodedData);
-    print('result : $result');
+    try {
+      c.updateFetchingMessageStatus(true);
+      final result = await _service.getData(path: APIPath.recentChats());
+      RecentChatModel decodedData = RecentChatModel.fromJson(result);
+      print('messages $decodedData');
+      c.setRecentChats(decodedData);
+      c.updateFetchingMessageStatus(false);
+      print('result : $result');
 
-    return decodedData;
+      return decodedData;
+    } catch (e) {
+      c.updateFetchingMessageStatus(false);
+    }
   }
 }

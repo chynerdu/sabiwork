@@ -1,10 +1,7 @@
 // ignore_for_file: avoid_print
-
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:get/get.dart';
-import 'package:jiffy/jiffy.dart';
+
+import 'package:sabiwork/services/config.dart';
 import 'package:sabiwork/services/getStates.dart';
 // ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -13,7 +10,7 @@ import 'package:socket_io_client/socket_io_client.dart';
 class SocketConnection {
   Socket socket = io(
       // 'https://a1e3-102-89-46-147.ngrok.io',
-      'http://192.168.8.194:4501',
+      Config.socketUrl,
       // dotenv.env['SOCKETURL'],
       OptionBuilder()
           .setPath('/socket.io/')
@@ -27,7 +24,7 @@ class SocketConnection {
     socket.connect();
     socket.on('connect', (data) {
       print('connected data ${socket.id}');
-      joinChatRoom(socket, '904848484993937');
+      joinChatRoom(socket);
       // join public room
     });
     socket.on('event', (data) => print(data));
@@ -40,15 +37,13 @@ class SocketConnection {
       // print('joined room ${response}');
     });
 
-    socket.on('connectToRoom', (data) {
-      print('connected  from private>>>>>>> $data');
-    });
+    socket.on('connectToRoom', (data) {});
 
     socket.on('newMessage', (data) {
       Controller c = Get.put(Controller());
-      print('message5 ${data['data']['message']}');
-      c.updateMessageList(data['data']);
-      print('new message from chat>>>>>>> $data');
+      if (c.activeRecipient.value == data['data']['senderId']) {
+        c.updateMessageList(data['data']);
+      }
     });
 
     socket.onDisconnect((_) => print('disconnect'));
@@ -66,7 +61,7 @@ class SocketConnection {
     socket.on('disconnect', (data) => print('Socket disconnected'));
   }
 
-  joinChatRoom(IO.Socket socket, recipientId) {
+  joinChatRoom(IO.Socket socket) {
     Controller c = Get.put(Controller());
     var payload = {
       "userId": c.userData.value.id,

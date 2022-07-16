@@ -35,16 +35,14 @@ class HttpInstance {
     Controller c = Get.put(Controller());
     print('path $path');
     try {
-      c.change(true);
       Future<http.Response> apiResponse =
           http.get(Uri.parse(path), headers: headers);
       http.Response response = await apiResponse;
       print('api $path');
       print('response code ${response.statusCode}');
       print('response ${response.body}');
-      c.change(false);
+
       if (response.statusCode == 404) {
-        c.change(false);
         throw ResponseModel.fromJson({"error": 'Route not found'});
       }
       if (response.statusCode < 200 || response.statusCode > 299) {
@@ -52,17 +50,14 @@ class HttpInstance {
       }
       return jsonDecode(response.body);
     } on SocketException catch (_) {
-      c.change(false);
       throw 'Kindly, check your internet connection.';
     } on TimeoutException catch (_) {
-      c.change(false);
       throw 'Request Timeout.';
     } on FormatException catch (_) {
-      c.change(false);
       throw 'Error Occured.';
     } catch (e) {
       final ResponseModel error = e as ResponseModel;
-      c.change(false);
+
       print('errr ${e.toString()} ');
       throw error.error ?? 'error occured';
     }

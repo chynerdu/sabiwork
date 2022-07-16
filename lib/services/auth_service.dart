@@ -77,14 +77,19 @@ class AuthService {
 
   Future fetchProfile() async {
     Controller c = Get.put(Controller());
-    final result = await _service.getData(path: APIPath.profile());
-    final decodedData = UserModel.fromJson(result['result']['data']);
-    c.setUserData(decodedData);
-    initFirebase('443');
+    try {
+      c.change(true);
+      final result = await _service.getData(path: APIPath.profile());
+      final decodedData = UserModel.fromJson(result['result']['data']);
+      c.setUserData(decodedData);
+      initFirebase('443');
 
-    print('result : $result');
-
-    return decodedData;
+      print('result : $result');
+      c.change(false);
+      return decodedData;
+    } catch (e) {
+      c.change(false);
+    }
   }
 
   Future subscribeToFirebase(FirebaseSubscribeModel payload) async {
@@ -100,22 +105,30 @@ class AuthService {
 
   Future fetchStates() async {
     Controller c = Get.put(Controller());
+    try {
+      c.change(true);
+      final result = await _service.getData(path: APIPath.states());
 
-    final result = await _service.getData(path: APIPath.states());
-
-    print('result : $result');
-
-    return result;
+      print('result : $result');
+      c.change(false);
+      return result;
+    } catch (e) {
+      c.change(false);
+    }
   }
 
   Future fetchLGA(id) async {
     Controller c = Get.put(Controller());
+    try {
+      c.change(true);
+      final result = await _service.getData(path: APIPath.lga(id));
 
-    final result = await _service.getData(path: APIPath.lga(id));
-
-    print('result : $result');
-
-    return result;
+      print('result : $result');
+      c.change(false);
+      return result;
+    } catch (e) {
+      c.change(false);
+    }
   }
 
   initFirebase(accountId) {

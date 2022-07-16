@@ -11,6 +11,7 @@ import 'package:sabiwork/common/router.dart' as router;
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/job_service.dart';
+import 'package:sabiwork/services/messages_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +58,7 @@ class MyAppState extends State<MyApp> {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   JobService jobService = JobService();
+  MessageService messageService = MessageService();
 
   void initState() {
     initFlutterLocalNotification();
@@ -65,6 +67,7 @@ class MyAppState extends State<MyApp> {
   }
 
   initFlutterLocalNotification() async {
+    Controller c = Get.put(Controller());
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();
 // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
@@ -98,14 +101,23 @@ class MyAppState extends State<MyApp> {
 
 //  init local notification before listening to message
     FirebaseMessaging.onMessage.listen((RemoteMessage event) async {
-      var body = json.decode(event.notification!.body as String)['body'];
+      // var body = json.decode(event.notification!.body as String)['body'];
       callNotifification(event, channel);
-      print("message recieved $body");
+      print("message recieved ${event.notification!.body}");
+      print("message recieved >> ${event.data}");
 
-      if (body['type'] == 'chat') {
-        jobService.fetchAllJobs();
-        jobService.fetchMyJobs();
-        jobService.fetchApprovedJobs();
+      if (event.data['type'] == 'job') {
+        if (c.userData.value.role == "service-provider") {
+          jobService.fetchAllJobs();
+          jobService.fetchAppliedJobs();
+          jobService.fetchApprovedJobs();
+        } else {
+          jobService.fetchMyOpenJobs();
+          jobService.fetchMyJobs();
+          jobService.fetchApprovedJobs();
+        }
+      } else if (event.data['type'] == 'chat') {
+        messageService.fetchRecentChats();
       }
     });
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
@@ -129,7 +141,7 @@ class MyAppState extends State<MyApp> {
       flutterLocalNotificationsPlugin.show(
           notification.hashCode,
           notification.title,
-          json.decode(notification.body as String)['body']['body'],
+          notification.body,
           NotificationDetails(
             android: AndroidNotificationDetails(
               channel.id, channel.name,

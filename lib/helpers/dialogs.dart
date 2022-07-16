@@ -26,7 +26,7 @@ class CustomDialogs {
               //   style: TextStyle(color: CustomColors.PrimaryColor),
               // ),
               content: Container(
-                  height: 400,
+                  height: 420,
                   padding: EdgeInsets.symmetric(horizontal: 10),
                   // height: 500,
                   child: Column(children: [

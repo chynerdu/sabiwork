@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
 import 'package:get/get.dart';
+import 'package:image_viewer/image_viewer.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/models/userModel.dart';
@@ -157,10 +160,41 @@ class UsersProfileImageSAvatarx2 extends StatelessWidget {
   Widget build(BuildContext context) {
     if (user!.profileImage != null) {
       return MainAvatar(
-          child: CircleAvatar(
-        radius: 45,
-        backgroundImage: NetworkImage('${user!.profileImage}'),
-      ));
+          child:
+              //     PhotoView(
+              //   tightMode: false,
+              //   imageProvider: NetworkImage('${user!.profileImage}'),
+              // )
+              FullScreenWidget(
+        child: Center(
+            child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.45,
+          child: Hero(
+            tag: "smallImage",
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(45),
+              child: Image.network(
+                "${user!.profileImage}",
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        )),
+      )
+          // GestureDetector(
+          //     onTap: () => ImageViewer.showImageSlider(
+          //           images: [
+          //             '${user!.profileImage}',
+          //           ],
+          //           startingPosition: 1,
+          //         ),
+          //     child:
+          //         CircleAvatar(
+          //   radius: 45,
+          //   backgroundImage: NetworkImage('${user!.profileImage}'),
+          // )
+          );
     } else {
       return MainAvatar(
           child: CircleAvatar(

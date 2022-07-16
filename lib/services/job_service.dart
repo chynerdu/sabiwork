@@ -17,52 +17,69 @@ class JobService {
 
   Future fetchAllJobs() async {
     Controller c = Get.put(Controller());
-    c.updateJobFetchStatus(true);
-    final result = await _service.getData(path: APIPath.allJobs());
-    AllJobsModel decodedData = AllJobsModel.fromJson(result['result']);
-    print('jobs $decodedData');
-    c.setAllJobs(decodedData);
-    c.updateJobFetchStatus(false);
-    print('result : $result');
-
-    return decodedData;
+    try {
+      c.updateJobFetchStatus(true);
+      final result = await _service.getData(path: APIPath.allJobs());
+      AllJobsModel decodedData = AllJobsModel.fromJson(result['result']);
+      print('jobs $decodedData');
+      c.setAllJobs(decodedData);
+      c.updateJobFetchStatus(false);
+      print('result : $result');
+      c.change(false);
+      return decodedData;
+    } catch (e) {
+      c.updateJobFetchStatus(true);
+    }
   }
 
   Future fetchMyJobs() async {
     Controller c = Get.put(Controller());
-    c.updateMyJobFetchStatus(true);
-    final result = await _service.getData(path: APIPath.myJobs());
-    MyJobsModel decodedData = MyJobsModel.fromJson(result['result']);
-    print('jobs $decodedData');
-    c.setMyJobs(decodedData);
-    c.updateMyJobFetchStatus(false);
-    print('result my jobs : $result');
+    try {
+      c.updateMyJobFetchStatus(true);
+      final result = await _service.getData(path: APIPath.myJobs());
+      MyJobsModel decodedData = MyJobsModel.fromJson(result['result']);
+      print('jobs $decodedData');
+      c.setMyJobs(decodedData);
+      c.updateMyJobFetchStatus(false);
+      print('result my jobs : $result');
 
-    return decodedData;
+      return decodedData;
+    } catch (e) {
+      c.updateMyJobFetchStatus(false);
+    }
   }
 
   Future fetchMyOpenJobs() async {
     Controller c = Get.put(Controller());
-    c.updateMyJobFetchStatus(true);
-    final result = await _service.getData(path: APIPath.myOpenJobs());
-    MyJobsModel decodedData = MyJobsModel.fromJson(result['result']);
-    print('jobs $decodedData');
-    c.setMyOpenJobs(decodedData);
-    c.updateMyJobFetchStatus(false);
+    try {
+      c.updateMyJobFetchStatus(true);
+      final result = await _service.getData(path: APIPath.myOpenJobs());
+      MyJobsModel decodedData = MyJobsModel.fromJson(result['result']);
+      print('jobs $decodedData');
+      c.setMyOpenJobs(decodedData);
+      c.updateMyJobFetchStatus(false);
 
-    return decodedData;
+      return decodedData;
+    } catch (e) {
+      c.updateMyJobFetchStatus(false);
+    }
   }
 
   Future fetchMyClosedJobs() async {
     Controller c = Get.put(Controller());
-    c.updateMyJobFetchStatus(true);
-    final result = await _service.getData(path: APIPath.myClosedJobs());
-    MyJobsModel decodedData = MyJobsModel.fromJson(result['result']);
-    print('jobs $decodedData');
-    c.setMyClosedJobs(decodedData);
-    c.updateMyJobFetchStatus(false);
 
-    return decodedData;
+    try {
+      c.updateMyJobFetchStatus(true);
+      final result = await _service.getData(path: APIPath.myClosedJobs());
+      MyJobsModel decodedData = MyJobsModel.fromJson(result['result']);
+      print('jobs $decodedData');
+      c.setMyClosedJobs(decodedData);
+      c.updateMyJobFetchStatus(false);
+
+      return decodedData;
+    } catch (e) {
+      c.updateMyJobFetchStatus(false);
+    }
   }
 
   Future updateMyJob(id, payload) async {
@@ -83,82 +100,121 @@ class JobService {
 
   Future fetchAppliedJobs() async {
     Controller c = Get.put(Controller());
-    c.updateMyJobFetchStatus(true);
-    final result = await _service.getData(path: APIPath.myAppliedJobs());
-    MyAppliedJobModel decodedData = MyAppliedJobModel.fromJson(result);
-    print('jobs $decodedData');
-    c.setMyAppliedJobs(decodedData);
-    c.updateMyJobFetchStatus(false);
-    print('result my applied jobs : $result');
+    try {
+      c.updateMyJobFetchStatus(true);
+      final result = await _service.getData(path: APIPath.myAppliedJobs());
+      MyAppliedJobModel decodedData = MyAppliedJobModel.fromJson(result);
+      print('jobs $decodedData');
+      c.setMyAppliedJobs(decodedData);
+      c.updateMyJobFetchStatus(false);
+      print('result my applied jobs : $result');
 
-    return decodedData;
+      return decodedData;
+    } catch (e) {
+      c.updateMyJobFetchStatus(false);
+      print('error fetching applied jobs $e');
+    }
   }
 
   Future fetchApplicants(id) async {
     Controller c = Get.put(Controller());
-    c.resetApplicants();
+    try {
+      c.resetApplicants();
 
-    c.updataeApplicantsFetchStatus(true);
-    final result = await _service.getData(path: APIPath.fetchApplicants(id));
-    print('length 22 ${result['result']['data'].length}');
-    // filter out approved applicants
-    var updatedResult;
-    if (c.allApprovedApplicants.value.data != null &&
-        result['result']['data'].length > 0) {
-      var filteredList = result['result']['data']
-          .where((apllicant) => c.allApprovedApplicants.value.data!.any(
-              (approvedApplicant) =>
-                  approvedApplicant.user!.id != apllicant['user']['_id']))
-          .toList();
+      c.updataeApplicantsFetchStatus(true);
+      final result = await _service.getData(path: APIPath.fetchApplicants(id));
 
-      updatedResult = {
-        ...result,
-        'result': new Map<String, dynamic>.from(
-            {...result['result'], 'data': filteredList})
-      };
-    } else {
-      updatedResult = result;
+      // filter out approved applicants
+      var updatedResult;
+      if (c.allApprovedApplicants.value.data != null) {
+        if (c.allApprovedApplicants.value.data!.length > 0) {
+          var filteredList = [];
+          var approvedApplicants = [];
+          c.allApprovedApplicants.value.data!.forEach((item) {
+            approvedApplicants.add(item.user!.id);
+          });
+
+          // result['result']['data'].forEach(
+          //   (apllicant) =>
+          //       c.allApprovedApplicants.value.data!.map((approvedApplicant) {
+          //     if (approvedApplicant.user!.id != apllicant['user']['_id']) {
+          //       print(
+          //           'compared ${approvedApplicant.user!.id} to ${apllicant['user']['_id']}');
+          //       print('added to list');
+          //       filteredList.add(apllicant);
+          //     }
+          //   }),
+          // );
+          result['result']['data'].forEach((apllicant) {
+            if (!approvedApplicants.contains(apllicant['user']['_id'])) {
+              filteredList.add(apllicant);
+            }
+          });
+
+          updatedResult = {
+            ...result,
+            'result': new Map<String, dynamic>.from(
+                {...result['result'], 'data': filteredList})
+          };
+        } else {
+          updatedResult = result;
+        }
+      } else {
+        updatedResult = result;
+      }
+
+      ApplicantsModel decodedData =
+          ApplicantsModel.fromJson(updatedResult['result']);
+
+      c.setAllApplicants(decodedData);
+      c.updataeApplicantsFetchStatus(false);
+      print('result : $result');
+
+      return decodedData;
+    } catch (e) {
+      c.updataeApplicantsFetchStatus(false);
     }
-
-    ApplicantsModel decodedData =
-        ApplicantsModel.fromJson(updatedResult['result']);
-
-    c.setAllApplicants(decodedData);
-    c.updataeApplicantsFetchStatus(false);
-    print('result : $result');
-
-    return decodedData;
   }
 
   Future fetchApprovedApplicants(id) async {
     Controller c = Get.put(Controller());
-    c.resetApprovedApplicants();
 
-    c.updataeApplicantsFetchStatus(true);
-    final result =
-        await _service.getData(path: APIPath.fetchApprovedApplicants(id));
-    ApplicantsModel decodedData = ApplicantsModel.fromJson(result['result']);
-    print('applicants $decodedData');
-    c.setAllApprovedApplicants(decodedData);
-    c.updataeApplicantsFetchStatus(false);
-    print('result : $result');
+    try {
+      c.resetApprovedApplicants();
 
-    return decodedData;
+      c.updataeApplicantsFetchStatus(true);
+      final result =
+          await _service.getData(path: APIPath.fetchApprovedApplicants(id));
+      ApplicantsModel decodedData = ApplicantsModel.fromJson(result['result']);
+      print('applicants $decodedData');
+      c.setAllApprovedApplicants(decodedData);
+      c.updataeApplicantsFetchStatus(false);
+      print('result : $result');
+
+      return decodedData;
+    } catch (e) {
+      c.updataeApplicantsFetchStatus(false);
+    }
   }
 
   Future fetchApprovedJobs() async {
     Controller c = Get.put(Controller());
-    c.resetApprovedJobs();
+    try {
+      c.resetApprovedJobs();
 
-    c.updataeApplicantsFetchStatus(true);
-    final result = await _service.getData(path: APIPath.fetchApprovedJobs());
-    ApprovedJobModel decodedData = ApprovedJobModel.fromJson(result['result']);
-    print('applicants $decodedData');
-    c.setAllApprovedJobs(decodedData);
-    c.updataeApplicantsFetchStatus(false);
-    print('result : $result');
+      c.updataeApplicantsFetchStatus(true);
+      final result = await _service.getData(path: APIPath.fetchApprovedJobs());
+      ApprovedJobModel decodedData =
+          ApprovedJobModel.fromJson(result['result']);
+      print('applicants $decodedData');
+      c.setAllApprovedJobs(decodedData);
+      c.updataeApplicantsFetchStatus(false);
+      print('result : $result');
 
-    return decodedData;
+      return decodedData;
+    } catch (e) {
+      c.updataeApplicantsFetchStatus(false);
+    }
   }
 
   Future applyForJob(ApplyJobModel payload, id) async {

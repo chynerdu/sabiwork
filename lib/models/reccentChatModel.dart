@@ -1,3 +1,4 @@
+import 'package:sabiwork/models/messagesModel.dart' as messageData;
 import 'package:sabiwork/models/userModel.dart';
 
 class RecentChatModel {
@@ -77,67 +78,49 @@ class Meta {
 
 class Data {
   String? sId;
-  Docs? docs;
-  List<UserModel>? senderData;
-  List<UserModel>? recipientData;
+  String? host;
+  UserModel? recipient;
+  int? iV;
+  messageData.Data? lastMessage;
+  String? createdAt;
+  String? updatedAt;
 
-  Data({this.sId, this.docs, this.senderData, this.recipientData});
+  Data(
+      {this.sId,
+      this.host,
+      this.recipient,
+      this.iV,
+      this.lastMessage,
+      this.createdAt,
+      this.updatedAt});
 
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
-    docs = json['docs'] != null ? new Docs.fromJson(json['docs']) : null;
-    if (json['senderData'] != null) {
-      senderData = <UserModel>[];
-      json['senderData'].forEach((v) {
-        senderData!.add(new UserModel.fromJson(v));
-      });
-    }
-    if (json['recipientData'] != null) {
-      recipientData = <UserModel>[];
-      json['recipientData'].forEach((v) {
-        recipientData!.add(new UserModel.fromJson(v));
-      });
-    }
+    host = json['host'];
+    recipient = json['recipient'] != null
+        ? new UserModel.fromJson(json['recipient'])
+        : null;
+    iV = json['__v'];
+    lastMessage = json['lastMessage'] != null
+        ? new messageData.Data.fromJson(json['lastMessage'])
+        : null;
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.sId;
-    if (this.docs != null) {
-      data['docs'] = this.docs!.toJson();
+    data['host'] = this.host;
+    if (this.recipient != null) {
+      data['recipient'] = this.recipient!.toJson();
     }
-    if (this.senderData != null) {
-      data['senderData'] = this.senderData!.map((v) => v.toJson()).toList();
+    data['__v'] = this.iV;
+    if (this.lastMessage != null) {
+      data['lastMessage'] = this.lastMessage!.toJson();
     }
-    if (this.recipientData != null) {
-      data['recipientData'] =
-          this.recipientData!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class Docs {
-  String? senderId;
-  String? recipient;
-  String? message;
-  String? createdAt;
-
-  Docs({this.senderId, this.recipient, this.message, this.createdAt});
-
-  Docs.fromJson(Map<String, dynamic> json) {
-    senderId = json['senderId'];
-    recipient = json['recipient'];
-    message = json['message'];
-    createdAt = json['createdAt'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['senderId'] = this.senderId;
-    data['recipient'] = this.recipient;
-    data['message'] = this.message;
     data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
     return data;
   }
 }

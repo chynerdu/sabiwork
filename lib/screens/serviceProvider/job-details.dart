@@ -2,12 +2,14 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:sabiwork/common/profileImage.dart';
 import 'package:sabiwork/common/ratingBar.dart';
 import 'package:sabiwork/common/stacked_image.dart';
 import 'package:sabiwork/components/SWbutton.dart';
+import 'package:sabiwork/components/sabiBadges.dart';
 import 'package:sabiwork/helpers/customColors.dart';
 import 'package:sabiwork/helpers/flushBar.dart';
 import 'package:sabiwork/models/allJobsModel.dart';
@@ -16,7 +18,8 @@ import 'package:sabiwork/services/job_service.dart';
 
 class JobDetails extends StatefulWidget {
   Data? job;
-  JobDetails({this.job});
+  bool? alreadyApplied = false;
+  JobDetails({this.job, this.alreadyApplied});
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -41,6 +44,7 @@ class JobDetailsState extends State<JobDetails> {
       final result =
           await jobService.applyForJob(applyJobModel, widget.job!.sId);
       print('result $result');
+      Navigator.pop(context);
       Navigator.pop(context);
       customFlushBar.showSuccessFlushBar(
           title: 'Application sent',
@@ -208,51 +212,77 @@ class JobDetailsState extends State<JobDetails> {
                                     '${widget.job!.numberOfWorkers} Person(s)',
                                 color: Color(0xffe6e6e6)),
                             SabiBadges(
-                                title: 'Job open', color: Color(0xFF7AD67D))
+                              titleColor: Colors.white,
+                              title:
+                                  'Job ${widget.job!.jobStatus!.toLowerCase()} ',
+                              color: widget.job!.jobStatus == 'Open'
+                                  ? Color(0xff209B25)
+                                  : widget.job!.jobStatus == 'Suspended'
+                                      ? Color.fromARGB(255, 207, 132, 11)
+                                      : Color.fromARGB(255, 201, 20, 20),
+                            )
                           ],
                         ),
                         SizedBox(height: 20),
-                        Row(
-                          children: [
-                            StackedImage(count: widget.job!.applicantCount),
-                            SizedBox(width: 10),
-                            Text('${widget.job!.applicantCount} applicant(s)',
-                                style: TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w500,
-                                )),
-                          ],
-                        ),
+                        if (widget.alreadyApplied == false ||
+                            widget.alreadyApplied == null)
+                          Row(
+                            children: [
+                              widget.job!.applicantCount != null
+                                  ? StackedImage(
+                                      count: widget.job!.applicantCount)
+                                  : SizedBox.shrink(),
+                              SizedBox(width: 10),
+                              Text('${widget.job!.applicantCount} applicant(s)',
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                            ],
+                          ),
                       ],
                     )
                   ],
                 )),
                 // action
                 SizedBox(height: 44),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
+                if (widget.job!.jobApplicants == null)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 34,
+                        width: MediaQuery.of(context).size.width * 0.28,
+                        child: SWSuttonSmall(
+                          title: 'Apply',
+                          onPressed: () {
+                            _apply(context);
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 17),
+                      SizedBox(
+                        height: 34,
+                        width: MediaQuery.of(context).size.width * 0.28,
+                        child: SWBorderedButton(
+                          title: 'Save',
+                          onPressed: () {},
+                        ),
+                      )
+                    ],
+                  )
+                else
+                  SizedBox(
                       height: 34,
-                      width: MediaQuery.of(context).size.width * 0.28,
-                      child: SWSuttonSmall(
-                        title: 'Apply',
+                      // width: MediaQuery.of(context).size.width * 0.28,
+                      child: SWSuttonSmallDisbaled(
+                        title:
+                            'Already applied ${Jiffy(widget.job!.jobApplicants!.createdAt).startOf(Units.DAY).fromNow()} ',
                         onPressed: () {
-                          _apply(context);
+                          null;
+                          // approve(context);
                         },
-                      ),
-                    ),
-                    SizedBox(width: 17),
-                    SizedBox(
-                      height: 34,
-                      width: MediaQuery.of(context).size.width * 0.28,
-                      child: SWBorderedButton(
-                        title: 'Save',
-                        onPressed: () {},
-                      ),
-                    )
-                  ],
-                ),
+                      )),
                 SizedBox(height: 17),
                 // Description
                 Divider(),
@@ -287,6 +317,22 @@ class JobDetailsState extends State<JobDetails> {
                             itemCount: widget.job!.jobImages!.length,
                             itemBuilder: (BuildContext context, index) {
                               return CachedNetworkImage(
+                                imageBuilder:
+                                    (BuildContext context, imageProvider) =>
+                                        FullScreenWidget(
+                                            child: Center(
+                                                child: Container(
+                                  child: Hero(
+                                    tag: "smallImage",
+                                    child: ClipRRect(
+                                      // borderRadius: BorderRadius.circular(6),
+                                      child: Image.network(
+                                        "${widget.job!.jobImages![index]}",
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                ))),
                                 imageUrl: '${widget.job!.jobImages![index]}',
                                 progressIndicatorBuilder: (context, url,
                                         downloadProgress) =>
@@ -362,21 +408,21 @@ class JobDetailsState extends State<JobDetails> {
   }
 }
 
-class SabiBadges extends StatelessWidget {
-  final Color color;
-  final String title;
+// class SabiBadges extends StatelessWidget {
+//   final Color color;
+//   final String title;
 
-  SabiBadges({required this.color, required this.title});
+//   SabiBadges({required this.color, required this.title});
 
-  Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        decoration: BoxDecoration(
-          color: color,
-        ),
-        child: Text(
-          '$title',
-          style: TextStyle(fontSize: 8),
-        ));
-  }
-}
+//   Widget build(BuildContext context) {
+//     return Container(
+//         padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+//         decoration: BoxDecoration(
+//           color: color,
+//         ),
+//         child: Text(
+//           '$title',
+//           style: TextStyle(fontSize: 8),
+//         ));
+//   }
+// }

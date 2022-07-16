@@ -76,6 +76,7 @@ class TabsState extends State<TabsMain> with AutomaticKeepAliveClientMixin {
     if (c.userData.value.role == "service-provider") {
       jobService.fetchAllJobs();
       jobService.fetchAppliedJobs();
+      jobService.fetchApprovedJobs();
     } else {
       jobService.fetchMyOpenJobs();
       jobService.fetchMyJobs();

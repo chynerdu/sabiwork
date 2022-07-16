@@ -11,6 +11,7 @@ import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/common/shimmerList.dart';
 import 'package:sabiwork/common/stacked_image.dart';
 import 'package:sabiwork/components/SWbutton.dart';
+import 'package:sabiwork/components/sabiBadges.dart';
 import 'package:sabiwork/models/allJobsModel.dart';
 import 'package:sabiwork/screens/serviceProvider/job-details.dart';
 import 'package:sabiwork/services/getStates.dart';
@@ -209,7 +210,7 @@ class AllJobs extends StatelessWidget {
             ? ShimmerList()
             : Column(
                 children: c.allJobs.value.data!
-                    .map((Data e) => JobCard(job: e))
+                    .map((Data e) => JobCard(job: e, applied: false))
                     .toList())
       ],
     ));
@@ -252,7 +253,7 @@ class AppliedJobs extends StatelessWidget {
             ? ShimmerList()
             : Column(
                 children: c.myAppliedJobs.value.result!.data!
-                    .map((dynamic e) => JobCard(job: e.job))
+                    .map((dynamic e) => JobCard(job: e.job, applied: true))
                     .toList())
       ],
     ));
@@ -262,14 +263,18 @@ class AppliedJobs extends StatelessWidget {
 class JobCard extends StatelessWidget {
   NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
   Data job;
-  JobCard({required this.job});
+  bool? applied = false;
+  JobCard({required this.job, this.applied});
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
           // Navigator.push(
           //   context,
           //   MaterialPageRoute(builder: (_) => JobDetailsState)))
-          Get.to(JobDetails(job: job));
+          Get.to(JobDetails(
+            job: job,
+            alreadyApplied: applied,
+          ));
         },
         child: Container(
             margin: EdgeInsets.only(bottom: 16),
@@ -295,31 +300,37 @@ class JobCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // image
-                    if (job.jobImages!.length > 0)
-                      Container(
-                          margin: EdgeInsets.only(top: 7),
-                          width: 40,
-                          height: 40,
-                          child: CachedNetworkImage(
-                            imageUrl: job.jobImages!.length > 0
-                                ? '${job.jobImages![0]}'
-                                : 'https://via.placeholder.com/150.png?text=No+image+available',
-                            progressIndicatorBuilder:
-                                (context, url, downloadProgress) => Container(
-                                    margin:
-                                        EdgeInsets.symmetric(horizontal: 10),
-                                    height: 115,
-                                    child: Center(
-                                        child: SizedBox(
-                                            width: 10,
-                                            height: 10,
-                                            child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                value: downloadProgress
-                                                    .progress)))),
-                            errorWidget: (context, url, error) =>
-                                Icon(Icons.error),
-                          )),
+                    job.jobImages != null
+                        ? job.jobImages!.length > 0
+                            ? Container(
+                                margin: EdgeInsets.only(top: 7),
+                                width: 40,
+                                height: 40,
+                                child: CachedNetworkImage(
+                                  imageUrl: job.jobImages!.length > 0
+                                      ? '${job.jobImages![0]}'
+                                      : 'https://via.placeholder.com/150.png?text=No+image+available',
+                                  progressIndicatorBuilder: (context, url,
+                                          downloadProgress) =>
+                                      Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                          height: 115,
+                                          child: Center(
+                                              child: SizedBox(
+                                                  width: 10,
+                                                  height: 10,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress)))),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
+                                ))
+                            : SizedBox.shrink()
+                        : SizedBox.shrink(),
                     SizedBox(width: 14),
                     Expanded(
                         child: Container(
@@ -374,17 +385,17 @@ class JobCard extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 //  left
-                                Row(
-                                  children: [
-                                    StackedImage(count: job.applicantCount),
-                                    SizedBox(width: 10),
-                                    Text('${job.applicantCount} applicant(s)',
-                                        style: TextStyle(
-                                          fontSize: 8,
-                                          fontWeight: FontWeight.w500,
-                                        )),
-                                  ],
-                                ),
+                                // Row(
+                                //   children: [
+                                //     StackedImage(count: job.applicantCount),
+                                //     SizedBox(width: 10),
+                                //     Text('${job.applicantCount} applicant(s)',
+                                //         style: TextStyle(
+                                //           fontSize: 8,
+                                //           fontWeight: FontWeight.w500,
+                                //         )),
+                                //   ],
+                                // ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [

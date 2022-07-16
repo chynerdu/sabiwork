@@ -1,3 +1,5 @@
+import 'package:sabiwork/models/allJobsModel.dart';
+
 class MyAppliedJobModel {
   Result? result;
 
@@ -19,16 +21,16 @@ class MyAppliedJobModel {
 
 class Result {
   Meta? meta;
-  List<Data>? data;
+  List<Job>? data;
 
   Result({this.meta, this.data});
 
   Result.fromJson(Map<String, dynamic> json) {
     meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <Job>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(new Job.fromJson(v));
       });
     }
   }
@@ -46,10 +48,10 @@ class Result {
 }
 
 class Meta {
-  Null? page;
-  Null? limit;
+  int? page;
+  int? limit;
   int? total;
-  Null? pages;
+  int? pages;
   int? nextPage;
 
   Meta({this.page, this.limit, this.total, this.pages, this.nextPage});
@@ -83,6 +85,7 @@ class Job {
   Job({this.sId, this.job, this.message, this.createdAt, this.iV});
 
   Job.fromJson(Map<String, dynamic> json) {
+    print('jobss>> ${json['job']}');
     sId = json['_id'];
     job = json['job'] != null ? new Data.fromJson(json['job']) : null;
     message = json['message'];
@@ -103,80 +106,81 @@ class Job {
   }
 }
 
-class Data {
-  String? jobType;
-  List<String>? jobImages;
-  String? jobStatus;
-  bool? iActive;
-  String? sId;
-  String? description;
-  String? numberOfWorkers;
-  String? pricePerWorker;
-  String? additionalDetails;
-  String? state;
-  String? lga;
-  String? address;
-  User? user;
-  String? createdAt;
-  int? iV;
+// class Data {
+//   String? jobType;
+//   List<String>? jobImages;
+//   String? jobStatus;
+//   bool? iActive;
+//   String? sId;
+//   String? description;
+//   String? numberOfWorkers;
+//   String? pricePerWorker;
+//   String? additionalDetails;
+//   String? state;
+//   String? lga;
+//   String? address;
+//   User? user;
+//   String? createdAt;
+//   int? iV;
 
-  Data(
-      {this.jobType,
-      this.jobImages,
-      this.jobStatus,
-      this.iActive,
-      this.sId,
-      this.description,
-      this.numberOfWorkers,
-      this.pricePerWorker,
-      this.additionalDetails,
-      this.state,
-      this.lga,
-      this.address,
-      this.user,
-      this.createdAt,
-      this.iV});
+//   Data(
+//       {this.jobType,
+//       this.jobImages,
+//       this.jobStatus,
+//       this.iActive,
+//       this.sId,
+//       this.description,
+//       this.numberOfWorkers,
+//       this.pricePerWorker,
+//       this.additionalDetails,
+//       this.state,
+//       this.lga,
+//       this.address,
+//       this.user,
+//       this.createdAt,
+//       this.iV});
 
-  Data.fromJson(Map<String, dynamic> json) {
-    jobType = json['job_type'];
-    jobImages = json['job_images'].cast<String>();
-    jobStatus = json['jobStatus'];
-    iActive = json['iActive'];
-    sId = json['_id'];
-    description = json['description'];
-    numberOfWorkers = json['number_of_workers'];
-    pricePerWorker = json['price_per_worker'];
-    additionalDetails = json['additionalDetails'];
-    state = json['state'];
-    lga = json['lga'];
-    address = json['address'];
-    user = json['user'] != null ? new User.fromJson(json['user']) : null;
-    createdAt = json['createdAt'];
-    iV = json['__v'];
-  }
+//   Data.fromJson(Map<String, dynamic> json) {
+//     jobType = json['job_type'];
+//     jobImages =
+//         json['job_images'] != null ? json['job_images'].cast<String>() : [];
+//     jobStatus = json['jobStatus'];
+//     iActive = json['iActive'];
+//     sId = json['_id'];
+//     description = json['description'];
+//     numberOfWorkers = json['number_of_workers'];
+//     pricePerWorker = json['price_per_worker'];
+//     additionalDetails = json['additionalDetails'];
+//     state = json['state'];
+//     lga = json['lga'];
+//     address = json['address'];
+//     user = json['user'] != null ? new User.fromJson(json['user']) : null;
+//     createdAt = json['createdAt'];
+//     iV = json['__v'];
+//   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['job_type'] = this.jobType;
-    data['job_images'] = this.jobImages;
-    data['jobStatus'] = this.jobStatus;
-    data['iActive'] = this.iActive;
-    data['_id'] = this.sId;
-    data['description'] = this.description;
-    data['number_of_workers'] = this.numberOfWorkers;
-    data['price_per_worker'] = this.pricePerWorker;
-    data['additionalDetails'] = this.additionalDetails;
-    data['state'] = this.state;
-    data['lga'] = this.lga;
-    data['address'] = this.address;
-    if (this.user != null) {
-      data['user'] = this.user!.toJson();
-    }
-    data['createdAt'] = this.createdAt;
-    data['__v'] = this.iV;
-    return data;
-  }
-}
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = new Map<String, dynamic>();
+//     data['job_type'] = this.jobType;
+//     data['job_images'] = this.jobImages;
+//     data['jobStatus'] = this.jobStatus;
+//     data['iActive'] = this.iActive;
+//     data['_id'] = this.sId;
+//     data['description'] = this.description;
+//     data['number_of_workers'] = this.numberOfWorkers;
+//     data['price_per_worker'] = this.pricePerWorker;
+//     data['additionalDetails'] = this.additionalDetails;
+//     data['state'] = this.state;
+//     data['lga'] = this.lga;
+//     data['address'] = this.address;
+//     if (this.user != null) {
+//       data['user'] = this.user!.toJson();
+//     }
+//     data['createdAt'] = this.createdAt;
+//     data['__v'] = this.iV;
+//     return data;
+//   }
+// }
 
 class User {
   String? role;

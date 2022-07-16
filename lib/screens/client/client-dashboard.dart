@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:lottie/lottie.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:sabiwork/common/profileImage.dart';
 import 'package:sabiwork/common/route_constants.dart';
 import 'package:sabiwork/common/shimmerList.dart';
@@ -116,8 +117,8 @@ class RecentJobs extends StatelessWidget {
     // _scrollController.addListener(toggleShowHeader());
 
     return RefreshIndicator(onRefresh: () async {
-      await jobService.fetchMyOpenJobs();
-      await jobService.fetchApprovedJobs();
+      jobService.fetchMyOpenJobs();
+      jobService.fetchApprovedJobs();
     }, child: Obx(() {
       return
           //  NotificationListener<ScrollNotification>(
@@ -385,7 +386,12 @@ class JobCard extends StatelessWidget {
                           margin: EdgeInsets.only(top: 7),
                           width: 40,
                           height: 40,
-                          child: CachedNetworkImage(
+                          child:
+                              // PhotoView(
+                              //   tightMode: false,
+                              //   imageProvider: NetworkImage('${job.jobImages![0]}'),
+                              // )
+                              CachedNetworkImage(
                             imageUrl: job.jobImages!.length > 0
                                 ? '${job.jobImages![0]}'
                                 : 'https://via.placeholder.com/150.png?text=No+image+available',
