@@ -389,7 +389,7 @@ class JobCard extends StatelessWidget {
                       ],
                     ),
                     if (job.jobApplicants != null)
-                      if (job.jobApplicants!.user != c.userData.value.id)
+                      if (job.jobApplicants!.user == c.userData.value.id)
                         SabiBadges(
                             title: 'Already applied',
                             titleColor: Colors.white,
@@ -496,8 +496,7 @@ class JobCard extends StatelessWidget {
                                   children: [
                                     Icon(Icons.access_time, size: 8),
                                     SizedBox(width: 3),
-                                    Text(
-                                        '${Jiffy(job.createdAt).startOf(Units.DAY).fromNow()}',
+                                    Text('${Jiffy(job.createdAt).fromNow()}',
                                         style: TextStyle(
                                           fontSize: 8,
                                           fontWeight: FontWeight.w500,

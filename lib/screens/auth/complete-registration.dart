@@ -253,9 +253,10 @@ class CompleteRegistrationState extends State<CompleteRegistration> {
   }
 
   initState() {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      fetchStates();
+    });
     super.initState();
-
-    fetchStates();
   }
 
   _displayDialog(BuildContext context) {

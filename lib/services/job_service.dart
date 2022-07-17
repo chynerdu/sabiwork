@@ -6,6 +6,8 @@ import 'package:sabiwork/models/approvedJobModel.dart';
 import 'package:sabiwork/models/myAppliedJobs.dart';
 import 'package:sabiwork/models/myJobsModel.dart';
 import 'package:sabiwork/models/myJobsModel.dart' as myJob;
+
+import 'package:sabiwork/models/ongoingJobsModel.dart';
 import 'package:sabiwork/services/api_path.dart';
 import 'package:sabiwork/services/getStates.dart';
 import 'package:sabiwork/services/http_instance.dart';
@@ -57,6 +59,24 @@ class JobService {
       MyJobsModel decodedData = MyJobsModel.fromJson(result['result']);
       print('jobs $decodedData');
       c.setMyOpenJobs(decodedData);
+      c.updateMyJobFetchStatus(false);
+
+      return decodedData;
+    } catch (e) {
+      c.updateMyJobFetchStatus(false);
+    }
+  }
+
+  Future fetchActiveApplicants() async {
+    Controller c = Get.put(Controller());
+    try {
+      c.updateMyJobFetchStatus(true);
+      final result =
+          await _service.getData(path: APIPath.fetchActiveApplicants());
+      ActiveApplicantsModel decodedData =
+          ActiveApplicantsModel.fromJson(result);
+      print('jobs $decodedData');
+      c.setActiveApplicants(decodedData);
       c.updateMyJobFetchStatus(false);
 
       return decodedData;
@@ -246,45 +266,72 @@ class JobService {
   }
 
   Future startJob({approvedJobId}) async {
-    print('approved job $approvedJobId');
-    final jobResult =
-        await _service.getData(path: APIPath.startJob(approvedJobId));
+    Controller c = Get.put(Controller());
+    try {
+      c.change(true);
+      print('approved job $approvedJobId');
 
-    // final decodedData = UserModel.fromJson(jobResult);
-    print('result : $jobResult');
-    fetchApprovedJobs();
-    return jobResult;
+      final jobResult =
+          await _service.getData(path: APIPath.startJob(approvedJobId));
+
+      // final decodedData = UserModel.fromJson(jobResult);
+      print('result : $jobResult');
+      c.change(false);
+      fetchApprovedJobs();
+
+      return jobResult;
+    } catch (e) {
+      c.change(false);
+    }
   }
 
   Future confirmStartJob({approvedJobId}) async {
-    final jobResult =
-        await _service.getData(path: APIPath.confirmStartJob(approvedJobId));
+    Controller c = Get.put(Controller());
+    try {
+      c.change(true);
+      final jobResult =
+          await _service.getData(path: APIPath.confirmStartJob(approvedJobId));
 
-    // final decodedData = UserModel.fromJson(jobResult);
-    print('result : $jobResult');
-    fetchApprovedApplicants(approvedJobId);
+      // final decodedData = UserModel.fromJson(jobResult);
+      print('result : $jobResult');
+      fetchApprovedApplicants(approvedJobId);
 
-    return jobResult;
+      return jobResult;
+    } catch (e) {
+      c.change(false);
+    }
   }
 
   Future endJob({approvedJobId}) async {
-    final jobResult =
-        await _service.getData(path: APIPath.endJob(approvedJobId));
+    Controller c = Get.put(Controller());
+    try {
+      c.change(true);
+      final jobResult =
+          await _service.getData(path: APIPath.endJob(approvedJobId));
 
-    // final decodedData = UserModel.fromJson(jobResult);
-    print('result : $jobResult');
-    fetchApprovedJobs();
-    return jobResult;
+      // final decodedData = UserModel.fromJson(jobResult);
+      print('result : $jobResult');
+      fetchApprovedJobs();
+      return jobResult;
+    } catch (e) {
+      c.change(false);
+    }
   }
 
   Future confirmEndJob({approvedJobId}) async {
-    final jobResult =
-        await _service.getData(path: APIPath.confirmEndJob(approvedJobId));
+    Controller c = Get.put(Controller());
+    try {
+      c.change(true);
+      final jobResult =
+          await _service.getData(path: APIPath.confirmEndJob(approvedJobId));
 
-    // final decodedData = UserModel.fromJson(jobResult);
-    print('result : $jobResult');
-    fetchApprovedApplicants(approvedJobId);
-    return jobResult;
+      // final decodedData = UserModel.fromJson(jobResult);
+      print('result : $jobResult');
+      fetchApprovedApplicants(approvedJobId);
+      return jobResult;
+    } catch (e) {
+      c.change(false);
+    }
   }
 }
 

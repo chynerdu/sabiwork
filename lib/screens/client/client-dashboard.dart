@@ -20,6 +20,7 @@ import 'package:sabiwork/helpers/flushBar.dart';
 import 'package:sabiwork/models/allJobsModel.dart';
 import 'package:sabiwork/models/myJobsModel.dart' as myJob;
 import 'package:sabiwork/models/approvedJobModel.dart';
+import 'package:sabiwork/models/ongoingJobsModel.dart';
 import 'package:sabiwork/screens/client/client-job-details.dart';
 
 import 'package:sabiwork/services/getStates.dart';
@@ -119,6 +120,7 @@ class RecentJobs extends StatelessWidget {
     return RefreshIndicator(onRefresh: () async {
       jobService.fetchMyOpenJobs();
       jobService.fetchApprovedJobs();
+      jobService.fetchActiveApplicants();
     }, child: Obx(() {
       return
           //  NotificationListener<ScrollNotification>(
@@ -153,7 +155,7 @@ class RecentJobs extends StatelessWidget {
                                   color: Color(0xff000000),
                                   fontSize: 20)),
                           Text(
-                              'You have ${c.allApprovedJobs.value.data?.length} active job',
+                              'You have ${c.activeApplicants.value.result?.data?.length ?? 0} active job',
                               style: TextStyle(
                                   fontWeight: FontWeight.w500,
                                   color: Color(0xff8D8D8D),
@@ -262,20 +264,21 @@ class RecentJobs extends StatelessWidget {
                                     fontSize: 14)))
                       ]),
                   SizedBox(height: 16),
-                  c.isFetchingJobs.value && c.allApprovedJobs.value.data != null
+                  c.isFetchingJobs.value &&
+                          c.activeApplicants.value.result == null
                       ? ShimmerRow()
-                      : c.allApprovedJobs.value.data != null &&
-                              c.allApprovedJobs.value.data!.length > 0
+                      : c.activeApplicants.value.result != null &&
+                              c.activeApplicants.value.result!.data!.length > 0
                           ? Container(
                               height: 150,
                               child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
-                                  itemCount:
-                                      c.allApprovedJobs.value.data!.length,
+                                  itemCount: c.activeApplicants.value.result!
+                                      .data!.length,
                                   itemBuilder: (BuildContext context, index) {
-                                    return ApprovedJobCard(
-                                        approvedJob: c.allApprovedJobs.value
-                                            .data![index]);
+                                    return ApprovedApplicantsCard(
+                                        approvedApplicant: c.activeApplicants
+                                            .value.result!.data![index]);
                                     // Image.network(
                                     //     '${widget.job!.jobImages![index]}');
                                   }))
@@ -500,19 +503,17 @@ class JobCard extends StatelessWidget {
   }
 }
 
-class ApprovedJobCard extends StatelessWidget {
+class ApprovedApplicantsCard extends StatelessWidget {
   NumberFormat _format = NumberFormat('#,###,###,###.##', 'en_US');
-  JobData approvedJob;
-  ApprovedJobCard({required this.approvedJob});
+  ActiveApplicantData approvedApplicant;
+  ApprovedApplicantsCard({required this.approvedApplicant});
   JobService jobService = JobService();
   final CustomFlushBar customFlushBar = CustomFlushBar();
   final CustomDialogs customDialogs = CustomDialogs();
 
   startJob(context) async {
     try {
-      await jobService.startJob(
-        approvedJobId: approvedJob.sId,
-      );
+      await jobService.startJob(approvedJobId: approvedApplicant.job!.sId);
 
       customDialogs.successDialog(
           context: context,
@@ -532,9 +533,7 @@ class ApprovedJobCard extends StatelessWidget {
 
   endJob(context) async {
     try {
-      await jobService.endJob(
-        approvedJobId: approvedJob.sId,
-      );
+      await jobService.endJob(approvedJobId: approvedApplicant.job!.sId);
 
       customDialogs.successDialog(
           context: context,
@@ -553,116 +552,116 @@ class ApprovedJobCard extends StatelessWidget {
   }
 
   Widget build(BuildContext context) {
-    final job = approvedJob.job;
-    return Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        padding: EdgeInsets.only(right: 10),
-        child: Container(
+    return approvedApplicant.user == null
+        ? SizedBox.shrink()
+        : Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            padding: EdgeInsets.only(right: 10),
             child: Container(
-                margin: EdgeInsets.only(bottom: 16),
-                padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                          color: Color(0xffefefef),
-                          blurRadius: 10.0,
-                          spreadRadius: 3.0)
-                    ],
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                child: Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    padding: EdgeInsets.fromLTRB(14, 0, 14, 14),
+                    decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                              color: Color(0xffefefef),
+                              blurRadius: 10.0,
+                              spreadRadius: 3.0)
+                        ],
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SabiBadges(
-                            title: '${job!.numberOfWorkers} Person(s)',
-                            color: Color(0xffe6e6e6)),
-                        SabiBadges(
-                            title: '${job.jobType}', color: Color(0xfff8dfdb))
-                      ],
-                    ),
-                    SizedBox(height: 9),
-                    GestureDetector(
-                        onTap: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(builder: (_) => JobDetailsState)))
-                          // Get.to(ClientJobDetails(job: job));
-                        },
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Row(
                           children: [
-                            Container(
-                                width: MediaQuery.of(context).size.width * 0.5,
-                                child: Text('${job.description}',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xff983701),
-                                    ))),
-                            Container(
-                                // width: MediaQuery.of(context).size.width * 0.18,
-                                child: FittedBox(
-                              fit: BoxFit.cover,
-                              child: Container(
-                                  // width: MediaQuery.of(context).size.width *
-                                  //     0.2,
-                                  child: Text(
-                                      '₦${_format.format(job.pricePerWorker)}',
-                                      // '${approvedJob.jobApplicantStatus!.toUpperCase()}',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        // color: Colors.green,
-                                        fontFamily: "Roboto",
-                                        fontWeight: FontWeight.w800,
-                                      ))),
-                            ))
+                            SabiBadges(
+                                title:
+                                    '${approvedApplicant.job!.numberOfWorkers} Person(s)',
+                                color: Color(0xffe6e6e6)),
+                            SabiBadges(
+                                title: '${approvedApplicant.job!.jobType}',
+                                color: Color(0xfff8dfdb))
                           ],
-                        )),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(Icons.location_pin, size: 10),
-                        Text(
-                            '${job.lga ?? 'Not specified'}, ${job.state ?? ''}',
+                        ),
+                        SizedBox(height: 9),
+                        GestureDetector(
+                            onTap: () {
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(builder: (_) => JobDetailsState)))
+                              // Get.to(ClientJobDetails(job: job));
+                            },
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.5,
+                                    child: Text(
+                                        '${approvedApplicant.user!.firstName} ${approvedApplicant.user!.lastName}',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xff983701),
+                                        ))),
+                                Container(
+                                    // width: MediaQuery.of(context).size.width * 0.18,
+                                    child: FittedBox(
+                                  fit: BoxFit.cover,
+                                  child: Container(
+                                      // width: MediaQuery.of(context).size.width *
+                                      //     0.2,
+                                      child: Text(
+                                          '₦${_format.format(approvedApplicant.job!.pricePerWorker)}',
+                                          // '${approvedJob.jobApplicantStatus!.toUpperCase()}',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            // color: Colors.green,
+                                            fontFamily: "Roboto",
+                                            fontWeight: FontWeight.w800,
+                                          ))),
+                                ))
+                              ],
+                            )),
+                        SizedBox(height: 5),
+                        Text('${approvedApplicant.job!.description}',
                             style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w500,
-                            ))
-                      ],
-                    ),
-                    SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                            height: 25,
-                            width: MediaQuery.of(context).size.width * 0.45,
-                            child: handleButton(
-                                approvedJob.jobApplicantStatus, context)),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            )),
+                        SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                                height: 25,
+                                width: MediaQuery.of(context).size.width * 0.45,
+                                child: handleButton(
+                                    approvedApplicant.jobApplicantStatus,
+                                    context)),
 
-                        // SizedBox(
-                        //   height: 25,
-                        //   width: MediaQuery.of(context).size.width * 0.3 - 22,
-                        //   child: SWBorderedButtonWithIcon(
-                        //     icon: Icon(Icons.close,
-                        //         color: Color(0xffBD4300), size: 13),
-                        //     title: 'Cancel',
-                        //     onPressed: () {},
-                        //   ),
-                        // ),
+                            // SizedBox(
+                            //   height: 25,
+                            //   width: MediaQuery.of(context).size.width * 0.3 - 22,
+                            //   child: SWBorderedButtonWithIcon(
+                            //     icon: Icon(Icons.close,
+                            //         color: Color(0xffBD4300), size: 13),
+                            //     title: 'Cancel',
+                            //     onPressed: () {},
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                        // Text('${job.additionalDetails}',
+                        //     style: TextStyle(
+                        //       fontSize: 13,
+                        //       color: Color(0xff888888),
+                        //       fontWeight: FontWeight.w500,
+                        //     )),
                       ],
-                    ),
-                    // Text('${job.additionalDetails}',
-                    //     style: TextStyle(
-                    //       fontSize: 13,
-                    //       color: Color(0xff888888),
-                    //       fontWeight: FontWeight.w500,
-                    //     )),
-                  ],
-                ))));
+                    ))));
   }
 
   handleButton(jobStatus, context) {

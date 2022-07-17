@@ -7,6 +7,8 @@ import 'package:sabiwork/models/approvedJobModel.dart';
 import 'package:sabiwork/models/messagesModel.dart' as MData;
 import 'package:sabiwork/models/myAppliedJobs.dart';
 import 'package:sabiwork/models/myJobsModel.dart';
+
+import 'package:sabiwork/models/ongoingJobsModel.dart';
 import 'package:sabiwork/models/reccentChatModel.dart';
 import 'package:sabiwork/models/userModel.dart';
 
@@ -30,6 +32,7 @@ class Controller extends GetxController {
   Rx<MyJobsModel> myJobs = MyJobsModel().obs;
 
   Rx<MyJobsModel> myOpenJobs = MyJobsModel().obs;
+  Rx<ActiveApplicantsModel> activeApplicants = ActiveApplicantsModel().obs;
 
   Rx<MyJobsModel> myClosedJobs = MyJobsModel().obs;
 
@@ -69,6 +72,10 @@ class Controller extends GetxController {
 
   void setRecentChats(state) {
     recentChats.value = state;
+  }
+
+  void setActiveApplicants(state) {
+    activeApplicants.value = state;
   }
 
   void setMyJobs(state) {

@@ -65,28 +65,43 @@ class Data {
       this.iV});
 
   Data.fromJson(Map<String, dynamic> json) {
-    jobType = json['job_type'] ?? '-';
-    jobImages =
-        json['job_images'] != null ? json['job_images'].cast<String>() : [];
-    jobStatus = json['jobStatus'];
-    applicantCount = json['applicant_count'];
-    shortlistedApplicants = json['shortlistedApplicants'] != null
-        ? json['shortlistedApplicants'].cast<String>()
-        : [];
-    sId = json['_id'];
-    lga = json['lga'] == 'null' ? 'Not specified' : json['lga'];
-    state = json['state'] ?? '';
-    address = json['address'];
-    jobApplicants = json['jobApplicants'] != null
-        ? new ApplicantModel.fromJson(json['jobApplicants'])
-        : null;
-    description = json['description'] ?? '-';
-    additionalDetails = json['additionalDetails'] ?? 'No additional details';
-    numberOfWorkers = int.tryParse(json['number_of_workers']) ?? 0;
-    pricePerWorker = int.tryParse(json['price_per_worker']) ?? 0;
-    user = json['user'] != null ? new UserModel.fromJson(json['user']) : null;
-    createdAt = json['createdAt'];
-    iV = json['__v'];
+    try {
+      // print(
+      //     'job app >>>>>>>>>>>> ${json['jobApplicants'] != null ? json['jobApplicants'].toList()[0] : 'is null oo>'}');
+      jobType = json['job_type'] ?? '-';
+      jobImages =
+          json['job_images'] != null ? json['job_images'].cast<String>() : [];
+      jobStatus = json['jobStatus'];
+      applicantCount = json['applicant_count'];
+      shortlistedApplicants = json['shortlistedApplicants'] != null
+          ? json['shortlistedApplicants'].cast<String>()
+          : [];
+      sId = json['_id'];
+      lga = json['lga'] == 'null' ? 'Not specified' : json['lga'];
+      state = json['state'] ?? '';
+      address = json['address'];
+      if (json['jobApplicants'] != null) {
+        if (json['jobApplicants'].length > 0) {
+          List<ApplicantModel> tempJobApplicants = [];
+          json['jobApplicants'].forEach((v) {
+            tempJobApplicants.add(new ApplicantModel.fromJson(v));
+          });
+          jobApplicants = tempJobApplicants[0];
+        } else {
+          jobApplicants = null;
+        }
+      }
+
+      description = json['description'] ?? '-';
+      additionalDetails = json['additionalDetails'] ?? 'No additional details';
+      numberOfWorkers = int.tryParse(json['number_of_workers']) ?? 0;
+      pricePerWorker = int.tryParse(json['price_per_worker']) ?? 0;
+      user = json['user'] != null ? new UserModel.fromJson(json['user']) : null;
+      createdAt = json['createdAt'];
+      iV = json['__v'];
+    } catch (e) {
+      print('error >>>>>>>>> $e');
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -102,9 +117,9 @@ class Data {
     data['address'] = this.address;
     data['description'] = this.description;
     data['additionalDetails'] = this.additionalDetails;
-    if (this.jobApplicants != null) {
-      data['jobApplicants'] = this.jobApplicants!.toJson();
-    }
+    // if (this.jobApplicants != null) {
+    //   data['jobApplicants'][0] = this.jobApplicants!.toJson();
+    // }
 
     data['number_of_workers'] = this.numberOfWorkers;
     data['price_per_worker'] = this.pricePerWorker;

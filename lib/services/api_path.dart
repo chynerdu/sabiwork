@@ -29,6 +29,9 @@ class APIPath {
   static String fetchApprovedApplicants(id) =>
       '${Config.baseUrl}/applicants/approved/$id';
 
+  static String fetchActiveApplicants() =>
+      '${Config.baseUrl}/applicants/approved';
+
   static String fetchApprovedJobs() =>
       '${Config.baseUrl}/applicants/approved/serviceProvider/mine';
   static String shortlisthApplicants(id) =>

@@ -246,43 +246,44 @@ class JobDetailsState extends State<JobDetails> {
                 )),
                 // action
                 SizedBox(height: 44),
-                if (widget.job!.jobApplicants == null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
+                if (widget.alreadyApplied != true)
+                  if (widget.job!.jobApplicants == null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 34,
+                          width: MediaQuery.of(context).size.width * 0.28,
+                          child: SWSuttonSmall(
+                            title: 'Apply',
+                            onPressed: () {
+                              _apply(context);
+                            },
+                          ),
+                        ),
+                        SizedBox(width: 17),
+                        SizedBox(
+                          height: 34,
+                          width: MediaQuery.of(context).size.width * 0.28,
+                          child: SWBorderedButton(
+                            title: 'Save',
+                            onPressed: () {},
+                          ),
+                        )
+                      ],
+                    )
+                  else
+                    SizedBox(
                         height: 34,
-                        width: MediaQuery.of(context).size.width * 0.28,
-                        child: SWSuttonSmall(
-                          title: 'Apply',
+                        // width: MediaQuery.of(context).size.width * 0.28,
+                        child: SWSuttonSmallDisbaled(
+                          title:
+                              'Already applied ${Jiffy(widget.job!.jobApplicants!.createdAt).fromNow()} ',
                           onPressed: () {
-                            _apply(context);
+                            null;
+                            // approve(context);
                           },
-                        ),
-                      ),
-                      SizedBox(width: 17),
-                      SizedBox(
-                        height: 34,
-                        width: MediaQuery.of(context).size.width * 0.28,
-                        child: SWBorderedButton(
-                          title: 'Save',
-                          onPressed: () {},
-                        ),
-                      )
-                    ],
-                  )
-                else
-                  SizedBox(
-                      height: 34,
-                      // width: MediaQuery.of(context).size.width * 0.28,
-                      child: SWSuttonSmallDisbaled(
-                        title:
-                            'Already applied ${Jiffy(widget.job!.jobApplicants!.createdAt).startOf(Units.DAY).fromNow()} ',
-                        onPressed: () {
-                          null;
-                          // approve(context);
-                        },
-                      )),
+                        )),
                 SizedBox(height: 17),
                 // Description
                 Divider(),

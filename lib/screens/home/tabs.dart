@@ -80,7 +80,7 @@ class TabsState extends State<TabsMain> with AutomaticKeepAliveClientMixin {
     } else {
       jobService.fetchMyOpenJobs();
       jobService.fetchMyJobs();
-      jobService.fetchApprovedJobs();
+      jobService.fetchActiveApplicants();
     }
 
     messageService.fetchRecentChats();

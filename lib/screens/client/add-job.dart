@@ -84,9 +84,11 @@ class AddJobState extends State<AddJob> {
   }
 
   initState() {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      usStateInProfile = false;
+      fetchStates();
+    });
     super.initState();
-    usStateInProfile = false;
-    fetchStates();
   }
 
   /// Get from gallery
